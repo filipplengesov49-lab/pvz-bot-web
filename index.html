@@ -38,6 +38,31 @@
       font-size: 24px;
     }
     
+    .current-point-info {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      padding: 15px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+      display: none;
+    }
+    
+    .current-point-info.active {
+      display: block;
+    }
+    
+    .current-point-info h2 {
+      margin: 0 0 8px 0;
+      font-size: 18px;
+    }
+    
+    .current-point-info p {
+      margin: 0;
+      font-size: 14px;
+      opacity: 0.9;
+    }
+    
     .stats {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -105,6 +130,15 @@
     
     .btn-warning {
       background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+    }
+    
+    .btn-danger {
+      background: linear-gradient(135deg, #ff416c, #ff4b2b);
+    }
+    
+    .btn-back {
+      background: linear-gradient(135deg, #a8edea, #fed6e3);
+      color: #333;
     }
     
     .calendar {
@@ -340,14 +374,51 @@
       background: #e9ecef;
     }
     
+    .point-info, .employee-info {
+      flex: 1;
+    }
+    
     .point-name, .employee-name {
       font-weight: bold;
       color: #333;
+      margin-bottom: 4px;
     }
     
-    .point-count, .employee-phone {
+    .point-address, .employee-details {
       color: #666;
       font-size: 14px;
+    }
+    
+    .point-actions, .employee-actions {
+      display: flex;
+      gap: 8px;
+    }
+    
+    .action-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      transition: transform 0.1s;
+    }
+    
+    .action-btn:hover {
+      transform: scale(1.1);
+    }
+    
+    .action-btn.delete {
+      background: #ff6b6b;
+      color: white;
+    }
+    
+    .action-btn.calendar {
+      background: #43e97b;
+      color: white;
     }
     
     .toast {
@@ -378,6 +449,43 @@
       background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
       color: white;
     }
+    
+    .toast.warning {
+      background: linear-gradient(135deg, #ffa726, #ff9800);
+      color: white;
+    }
+    
+    .confirm-popup {
+      text-align: center;
+      padding: 20px 0;
+    }
+    
+    .confirm-popup p {
+      margin-bottom: 20px;
+      color: #555;
+      font-size: 16px;
+    }
+    
+    .confirm-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    
+    .empty-state {
+      text-align: center;
+      color: #999;
+      padding: 40px 20px;
+    }
+    
+    .empty-state h4 {
+      margin-bottom: 10px;
+      color: #666;
+    }
+    
+    .empty-state p {
+      margin-bottom: 20px;
+    }
   </style>
 </head>
 <body>
@@ -394,6 +502,12 @@
           <div class="stat-label">Сотрудников</div>
         </div>
       </div>
+    </div>
+    
+    <!-- Информация о выбранном пункте -->
+    <div class="current-point-info" id="current-point-info">
+      <h2 id="current-point-name">ПВЗ Центральный</h2>
+      <p id="current-point-address">ул. Ленина, 10</p>
     </div>
     
     <div class="action-buttons">
@@ -444,7 +558,7 @@
         <input type="text" id="point-name" placeholder="Например: ПВЗ Центральный" maxlength="100">
       </div>
       <div class="form-group">
-        <label for="point-address">Адрес (опционально)</label>
+        <label for="point-address">Адрес *</label>
         <input type="text" id="point-address" placeholder="ул. Ленина, 10">
       </div>
       <div class="form-actions">
@@ -489,13 +603,6 @@
       </div>
       <div class="points-list" id="points-list">
         <!-- Список ПВЗ будет генерироваться -->
-        <div style="text-align: center; color: #999; padding: 20px;">
-          Пока нет пунктов выдачи.<br>
-          Нажмите ➕ ПВЗ чтобы добавить первый.
-        </div>
-      </div>
-      <div style="margin-top: 20px; text-align: center;">
-        <button class="btn btn-primary" onclick="showAddPointPopup()">➕ Добавить ПВЗ</button>
       </div>
     </div>
   </div>
@@ -509,13 +616,40 @@
       </div>
       <div class="employees-list" id="employees-list">
         <!-- Список сотрудников будет генерироваться -->
-        <div style="text-align: center; color: #999; padding: 20px;">
-          Пока нет сотрудников.<br>
-          Нажмите 👤 Сотрудник чтобы добавить первого.
+      </div>
+    </div>
+  </div>
+  
+  <!-- Поп-ап подтверждения удаления -->
+  <div class="popup" id="confirm-delete-popup">
+    <div class="popup-content">
+      <div class="popup-header">
+        <h3>⚠️ Подтверждение</h3>
+        <button class="popup-close" onclick="closePopup('confirm-delete-popup')">×</button>
+      </div>
+      <div class="confirm-popup">
+        <p id="confirm-delete-message">Вы уверены, что хотите удалить этот пункт?</p>
+        <div class="confirm-actions">
+          <button class="btn btn-secondary" onclick="closePopup('confirm-delete-popup')">Отмена</button>
+          <button class="btn btn-danger" id="confirm-delete-btn">Удалить</button>
         </div>
       </div>
-      <div style="margin-top: 20px; text-align: center;">
-        <button class="btn btn-secondary" onclick="showAddEmployeePopup()">👤 Добавить сотрудника</button>
+    </div>
+  </div>
+  
+  <!-- Поп-ап подтверждения дубликата -->
+  <div class="popup" id="confirm-duplicate-popup">
+    <div class="popup-content">
+      <div class="popup-header">
+        <h3>⚠️ Внимание</h3>
+        <button class="popup-close" onclick="closePopup('confirm-duplicate-popup')">×</button>
+      </div>
+      <div class="confirm-popup">
+        <p id="confirm-duplicate-message">Такой пункт уже существует. Добавить ещё раз?</p>
+        <div class="confirm-actions">
+          <button class="btn btn-secondary" onclick="closePopup('confirm-duplicate-popup')">Отмена</button>
+          <button class="btn btn-primary" id="confirm-add-btn">Добавить</button>
+        </div>
       </div>
     </div>
   </div>
@@ -535,6 +669,11 @@
         <div id="day-employees-list">
           <!-- Список сотрудников для выбора -->
         </div>
+        <div id="day-assigned-employee" style="display: none; margin-top: 20px;">
+          <p style="color: #4caf50; font-weight: bold; margin-bottom: 10px;">✅ Назначен:</p>
+          <div id="assigned-employee-name" style="font-size: 18px; margin-bottom: 15px;"></div>
+          <button class="btn btn-danger" onclick="clearDayAssignment()">Очистить день</button>
+        </div>
       </div>
     </div>
   </div>
@@ -546,6 +685,7 @@
     // ===== ХРАНИЛИЩЕ ДАННЫХ (localStorage) =====
     let currentYear = new Date().getFullYear();
     let currentMonth = new Date().getMonth();
+    let currentPointId = null; // ID выбранного пункта
     let points = JSON.parse(localStorage.getItem('pvz_points')) || [];
     let employees = JSON.parse(localStorage.getItem('pvz_employees')) || [];
     let schedule = JSON.parse(localStorage.getItem('pvz_schedule')) || []; // { pointId, employeeId, date }
@@ -593,8 +733,10 @@
         
         const dateStr = formatDate(year, month, day);
         
-        // Проверяем, есть ли запись в графике
-        const isScheduled = schedule.some(s => s.date === dateStr);
+        // Проверяем, есть ли запись в графике для текущего ПВЗ
+        const isScheduled = currentPointId && schedule.some(s => 
+          s.pointId === currentPointId && s.date === dateStr
+        );
         
         dayEl.classList.add(isScheduled ? 'busy' : 'free');
         
@@ -603,7 +745,13 @@
           dayEl.classList.add('today');
         }
         
-        dayEl.onclick = () => showDayPopup(day, month, year);
+        // Клик работает только если выбран ПВЗ
+        if (currentPointId) {
+          dayEl.onclick = () => showDayPopup(day, month, year);
+        } else {
+          dayEl.style.cursor = 'not-allowed';
+          dayEl.title = 'Выберите пункт выдачи для редактирования';
+        }
         
         daysContainer.appendChild(dayEl);
       }
@@ -663,23 +811,38 @@
       
       // Генерируем список сотрудников для выбора
       const listEl = document.getElementById('day-employees-list');
+      const assignedEl = document.getElementById('day-assigned-employee');
+      const assignedNameEl = document.getElementById('assigned-employee-name');
       
-      if (employees.length === 0) {
-        listEl.innerHTML = '<p style="color: #999;">Сначала добавьте сотрудников</p>';
+      // Проверяем, назначен ли уже сотрудник
+      const existing = schedule.find(s => s.pointId === currentPointId && s.date === dateStr);
+      
+      if (existing) {
+        const employee = employees.find(e => e.id === existing.employeeId);
+        assignedNameEl.textContent = employee ? employee.name : 'Неизвестный';
+        assignedEl.style.display = 'block';
+        listEl.style.display = 'none';
       } else {
-        let html = '';
-        employees.forEach(emp => {
-          html += `
-            <div class="employee-item" onclick="assignEmployeeToDay(${emp.id}, '${dateStr}')">
-              <div>
-                <div class="employee-name">${emp.name}</div>
-                <div class="employee-phone">${emp.phone || ''}</div>
+        assignedEl.style.display = 'none';
+        listEl.style.display = 'block';
+        
+        if (employees.length === 0) {
+          listEl.innerHTML = '<p style="color: #999;">Сначала добавьте сотрудников</p>';
+        } else {
+          let html = '';
+          employees.forEach(emp => {
+            html += `
+              <div class="employee-item" onclick="assignEmployeeToDay(${emp.id}, '${dateStr}')">
+                <div class="employee-info">
+                  <div class="employee-name">${emp.name}</div>
+                  <div class="employee-details">${emp.phone || ''}</div>
+                </div>
+                <div style="font-size: 24px;">➡️</div>
               </div>
-              <div style="font-size: 24px;">➡️</div>
-            </div>
-          `;
-        });
-        listEl.innerHTML = html;
+            `;
+          });
+          listEl.innerHTML = html;
+        }
       }
       
       showPopup('day-popup');
@@ -695,6 +858,34 @@
         return;
       }
       
+      if (!address || address.length < 5) {
+        showToast('Адрес должен быть не менее 5 символов', 'error');
+        return;
+      }
+      
+      // Проверка на дубликат
+      const existingPoint = points.find(p => 
+        p.name.toLowerCase() === name.toLowerCase() || 
+        p.address.toLowerCase() === address.toLowerCase()
+      );
+      
+      if (existingPoint) {
+        document.getElementById('confirm-duplicate-message').textContent = 
+          `Пункт с названием "${name}" или адресом "${address}" уже существует. Добавить ещё раз?`;
+        
+        document.getElementById('confirm-add-btn').onclick = () => {
+          doAddPoint(name, address);
+          closePopup('confirm-duplicate-popup');
+        };
+        
+        showPopup('confirm-duplicate-popup');
+        return;
+      }
+      
+      doAddPoint(name, address);
+    }
+    
+    function doAddPoint(name, address) {
       const newPoint = {
         id: points.length > 0 ? Math.max(...points.map(p => p.id)) + 1 : 1,
         name: name,
@@ -721,6 +912,26 @@
         return;
       }
       
+      // Проверка на дубликат по имени
+      const existingEmployee = employees.find(e => e.name.toLowerCase() === name.toLowerCase());
+      
+      if (existingEmployee) {
+        document.getElementById('confirm-duplicate-message').textContent = 
+          `Сотрудник "${name}" уже существует. Добавить ещё раз?`;
+        
+        document.getElementById('confirm-add-btn').onclick = () => {
+          doAddEmployee(name, phone, rate);
+          closePopup('confirm-duplicate-popup');
+        };
+        
+        showPopup('confirm-duplicate-popup');
+        return;
+      }
+      
+      doAddEmployee(name, phone, rate);
+    }
+    
+    function doAddEmployee(name, phone, rate) {
       const newEmployee = {
         id: employees.length > 0 ? Math.max(...employees.map(e => e.id)) + 1 : 1,
         name: name,
@@ -737,12 +948,125 @@
       renderEmployeesList();
     }
     
+    // ===== УДАЛЕНИЕ ПВЗ =====
+    function confirmDeletePoint(pointId) {
+      const point = points.find(p => p.id === pointId);
+      document.getElementById('confirm-delete-message').textContent = 
+        `Вы уверены, что хотите удалить "${point.name}"? Все данные о графике будут удалены.`;
+      
+      document.getElementById('confirm-delete-btn').onclick = () => {
+        deletePoint(pointId);
+        closePopup('confirm-delete-popup');
+      };
+      
+      showPopup('confirm-delete-popup');
+    }
+    
+    function deletePoint(pointId) {
+      // Удаляем сам ПВЗ
+      points = points.filter(p => p.id !== pointId);
+      
+      // Удаляем все записи из графика для этого ПВЗ
+      schedule = schedule.filter(s => s.pointId !== pointId);
+      
+      localStorage.setItem('pvz_points', JSON.stringify(points));
+      localStorage.setItem('pvz_schedule', JSON.stringify(schedule));
+      
+      // Если удаляем текущий ПВЗ, сбрасываем выбор
+      if (currentPointId === pointId) {
+        currentPointId = null;
+        document.getElementById('current-point-info').classList.remove('active');
+        generateCalendar(currentYear, currentMonth);
+      }
+      
+      showToast('✅ ПВЗ удалён!', 'success');
+      updateStats();
+      renderPointsList();
+    }
+    
+    // ===== УДАЛЕНИЕ СОТРУДНИКА =====
+    function confirmDeleteEmployee(employeeId) {
+      const employee = employees.find(e => e.id === employeeId);
+      document.getElementById('confirm-delete-message').textContent = 
+        `Вы уверены, что хотите удалить "${employee.name}"? Все назначения в графике будут удалены.`;
+      
+      document.getElementById('confirm-delete-btn').onclick = () => {
+        deleteEmployee(employeeId);
+        closePopup('confirm-delete-popup');
+      };
+      
+      showPopup('confirm-delete-popup');
+    }
+    
+    function deleteEmployee(employeeId) {
+      // Удаляем самого сотрудника
+      employees = employees.filter(e => e.id !== employeeId);
+      
+      // Удаляем все записи из графика для этого сотрудника
+      schedule = schedule.filter(s => s.employeeId !== employeeId);
+      
+      localStorage.setItem('pvz_employees', JSON.stringify(employees));
+      localStorage.setItem('pvz_schedule', JSON.stringify(schedule));
+      
+      showToast('✅ Сотрудник удалён!', 'success');
+      updateStats();
+      renderEmployeesList();
+    }
+    
     // ===== НАЗНАЧЕНИЕ СОТРУДНИКА НА ДЕНЬ =====
     function assignEmployeeToDay(employeeId, dateStr) {
-      // Пока просто показываем уведомление
+      if (!currentPointId) {
+        showToast('❌ Сначала выберите пункт выдачи', 'error');
+        return;
+      }
+      
+      // Удаляем старую запись для этого дня (если есть)
+      schedule = schedule.filter(s => !(s.pointId === currentPointId && s.date === dateStr));
+      
+      // Добавляем новую
+      schedule.push({
+        pointId: currentPointId,
+        employeeId: employeeId,
+        date: dateStr
+      });
+      
+      localStorage.setItem('pvz_schedule', JSON.stringify(schedule));
+      
       const employee = employees.find(e => e.id === employeeId);
       showToast(`📅 ${employee.name} назначен на ${dateStr}`, 'success');
       closePopup('day-popup');
+      generateCalendar(currentYear, currentMonth);
+    }
+    
+    // ===== ОЧИСТКА ДНЯ =====
+    function clearDayAssignment() {
+      const dateStr = document.getElementById('popup-date').textContent;
+      // Извлекаем дату из формата "27 января 2026"
+      const [day, monthName, year] = dateStr.split(' ');
+      const monthIndex = monthNames.findIndex(m => m.toLowerCase() === monthName);
+      const fullDate = formatDate(parseInt(year), monthIndex, parseInt(day));
+      
+      schedule = schedule.filter(s => !(s.pointId === currentPointId && s.date === fullDate));
+      localStorage.setItem('pvz_schedule', JSON.stringify(schedule));
+      
+      showToast('✅ День очищен', 'success');
+      closePopup('day-popup');
+      generateCalendar(currentYear, currentMonth);
+    }
+    
+    // ===== ВЫБОР ПВЗ ДЛЯ РЕДАКТИРОВАНИЯ =====
+    function selectPointForEditing(pointId) {
+      const point = points.find(p => p.id === pointId);
+      currentPointId = pointId;
+      
+      // Показываем информацию о выбранном ПВЗ
+      document.getElementById('current-point-name').textContent = point.name;
+      document.getElementById('current-point-address').textContent = point.address;
+      document.getElementById('current-point-info').classList.add('active');
+      
+      closePopup('points-list-popup');
+      showToast(`✅ Выбран: ${point.name}`, 'success');
+      generateCalendar(currentYear, currentMonth);
     }
     
     // ===== ОТОБРАЖЕНИЕ СПИСКОВ =====
@@ -751,9 +1075,10 @@
       
       if (points.length === 0) {
         listEl.innerHTML = `
-          <div style="text-align: center; color: #999; padding: 20px;">
-            Пока нет пунктов выдачи.<br>
-            Нажмите ➕ ПВЗ чтобы добавить первый.
+          <div class="empty-state">
+            <h4>📭 Пусто</h4>
+            <p>Пока нет пунктов выдачи</p>
+            <button class="btn btn-primary" onclick="showAddPointPopup()">➕ Добавить ПВЗ</button>
           </div>
         `;
         return;
@@ -763,11 +1088,14 @@
       points.forEach(point => {
         html += `
           <div class="point-item">
-            <div>
+            <div class="point-info" onclick="selectPointForEditing(${point.id})">
               <div class="point-name">${point.name}</div>
-              <div class="point-count">${point.address || 'Без адреса'}</div>
+              <div class="point-address">${point.address}</div>
             </div>
-            <div style="font-size: 24px;">➡️</div>
+            <div class="point-actions">
+              <button class="action-btn calendar" title="Редактировать" onclick="selectPointForEditing(${point.id})">📅</button>
+              <button class="action-btn delete" title="Удалить" onclick="confirmDeletePoint(${point.id})">🗑️</button>
+            </div>
           </div>
         `;
       });
@@ -780,9 +1108,10 @@
       
       if (employees.length === 0) {
         listEl.innerHTML = `
-          <div style="text-align: center; color: #999; padding: 20px;">
-            Пока нет сотрудников.<br>
-            Нажмите 👤 Сотрудник чтобы добавить первого.
+          <div class="empty-state">
+            <h4>📭 Пусто</h4>
+            <p>Пока нет сотрудников</p>
+            <button class="btn btn-secondary" onclick="showAddEmployeePopup()">👤 Добавить сотрудника</button>
           </div>
         `;
         return;
@@ -792,11 +1121,13 @@
       employees.forEach(emp => {
         html += `
           <div class="employee-item">
-            <div>
+            <div class="employee-info">
               <div class="employee-name">${emp.name}</div>
-              <div class="employee-phone">${emp.phone || ''} • ${emp.rate}₽/день</div>
+              <div class="employee-details">${emp.phone || ''} • ${emp.rate}₽/день</div>
             </div>
-            <div style="font-size: 24px;">➡️</div>
+            <div class="employee-actions">
+              <button class="action-btn delete" title="Удалить" onclick="confirmDeleteEmployee(${emp.id})">🗑️</button>
+            </div>
           </div>
         `;
       });
