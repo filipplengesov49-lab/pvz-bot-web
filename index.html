@@ -5,132 +5,564 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>График ПВЗ</title>
   <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
     body {
-      font-family: Arial, sans-serif;
-      background: #f5f5f5;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
       padding: 20px;
     }
-    .calendar {
-      background: white;
-      border-radius: 12px;
-      padding: 20px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      max-width: 400px;
+    
+    .container {
+      max-width: 500px;
       margin: 0 auto;
     }
+    
+    .header {
+      background: white;
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+      text-align: center;
+    }
+    
+    .header h1 {
+      color: #333;
+      margin-bottom: 15px;
+      font-size: 24px;
+    }
+    
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-top: 10px;
+    }
+    
+    .stat-item {
+      background: #f8f9fa;
+      padding: 10px;
+      border-radius: 8px;
+      text-align: center;
+    }
+    
+    .stat-number {
+      font-size: 24px;
+      font-weight: bold;
+      color: #667eea;
+    }
+    
+    .stat-label {
+      font-size: 12px;
+      color: #666;
+      margin-top: 2px;
+    }
+    
+    .action-buttons {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    
+    .btn {
+      padding: 15px;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform 0.1s, box-shadow 0.2s;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    }
+    
+    .btn-secondary {
+      background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    }
+    
+    .btn-success {
+      background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+    }
+    
+    .btn-warning {
+      background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+    }
+    
+    .calendar {
+      background: white;
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    }
+    
     .month-header {
       text-align: center;
       font-size: 24px;
       font-weight: bold;
       margin-bottom: 15px;
       color: #333;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
     }
+    
+    .month-nav {
+      background: none;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      color: #667eea;
+      padding: 5px 10px;
+    }
+    
     .weekdays {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
       text-align: center;
       font-weight: bold;
-      color: #666;
+      color: #888;
       margin-bottom: 10px;
+      font-size: 14px;
     }
+    
     .days {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
       gap: 5px;
     }
+    
     .day {
       aspect-ratio: 1;
       display: flex;
       align-items: center;
       justify-content: center;
-      border-radius: 8px;
+      border-radius: 10px;
       font-weight: bold;
       cursor: pointer;
-      transition: transform 0.1s;
+      transition: all 0.2s;
+      font-size: 14px;
+      position: relative;
+      overflow: hidden;
     }
+    
     .day:hover {
-      transform: scale(1.05);
+      transform: scale(1.1);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
     }
+    
     .day.empty {
       background: transparent;
+      cursor: default;
     }
+    
     .day.free {
-      background: #ff6b6b; /* красный — свободно */
+      background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
       color: white;
     }
+    
+    .day.free::after {
+      content: '';
+      position: absolute;
+      bottom: 4px;
+      right: 4px;
+      width: 6px;
+      height: 6px;
+      background: rgba(255,255,255,0.5);
+      border-radius: 50%;
+    }
+    
     .day.busy {
-      background: #4caf50; /* зелёный — занято */
+      background: linear-gradient(135deg, #4caf50, #43a047);
       color: white;
     }
-    .day.today {
-      border: 2px solid #3498db;
-      background: #3498db !important;
+    
+    .day.busy::after {
+      content: '';
+      position: absolute;
+      bottom: 4px;
+      right: 4px;
+      width: 6px;
+      height: 6px;
+      background: rgba(255,255,255,0.8);
+      border-radius: 50%;
     }
+    
+    .day.today {
+      border: 3px solid #667eea;
+      background: linear-gradient(135deg, #667eea, #764ba2) !important;
+    }
+    
+    .day.today::after {
+      display: none;
+    }
+    
+    .day-number {
+      position: relative;
+      z-index: 1;
+    }
+    
+    /* Поп-ап окна */
     .popup {
       position: fixed;
       top: 0; left: 0;
       width: 100%; height: 100%;
-      background: rgba(0,0,0,0.5);
+      background: rgba(0,0,0,0.7);
       display: flex;
       align-items: center;
       justify-content: center;
       z-index: 1000;
-      display: none;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
     }
+    
+    .popup.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+    
     .popup-content {
       background: white;
-      border-radius: 16px;
+      border-radius: 20px;
       padding: 25px;
       width: 90%;
-      max-width: 400px;
-      text-align: center;
+      max-width: 450px;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+      transform: translateY(20px);
+      transition: transform 0.3s;
     }
+    
+    .popup.active .popup-content {
+      transform: translateY(0);
+    }
+    
+    .popup-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid #f0f0f0;
+    }
+    
     .popup h3 {
-      margin-top: 0;
+      margin: 0;
+      color: #333;
+      font-size: 20px;
+    }
+    
+    .popup-close {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: #999;
+      padding: 5px;
+    }
+    
+    .popup-close:hover {
       color: #333;
     }
-    .close-popup {
+    
+    .form-group {
+      margin-bottom: 15px;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      color: #555;
+      font-weight: 500;
+    }
+    
+    .form-group input {
+      width: 100%;
+      padding: 12px 15px;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      font-size: 16px;
+      transition: border-color 0.2s;
+    }
+    
+    .form-group input:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+    
+    .form-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
       margin-top: 20px;
-      padding: 10px 20px;
-      background: #3498db;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-weight: bold;
+    }
+    
+    .points-list, .employees-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+    
+    .point-item, .employee-item {
+      background: #f8f9fa;
+      padding: 12px 15px;
+      border-radius: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       cursor: pointer;
+      transition: background 0.2s;
+    }
+    
+    .point-item:hover, .employee-item:hover {
+      background: #e9ecef;
+    }
+    
+    .point-name, .employee-name {
+      font-weight: bold;
+      color: #333;
+    }
+    
+    .point-count, .employee-phone {
+      color: #666;
+      font-size: 14px;
+    }
+    
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: white;
+      padding: 15px 25px;
+      border-radius: 10px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+      z-index: 2000;
+      transition: transform 0.3s;
+      font-weight: bold;
+      color: #333;
+    }
+    
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+    }
+    
+    .toast.success {
+      background: linear-gradient(135deg, #43e97b, #38f9d7);
+      color: white;
+    }
+    
+    .toast.error {
+      background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
+      color: white;
     }
   </style>
 </head>
 <body>
-  <div class="calendar">
-    <div class="month-header" id="month-name">Январь 2026</div>
-    <div class="weekdays">
-      <div>Пн</div>
-      <div>Вт</div>
-      <div>Ср</div>
-      <div>Чт</div>
-      <div>Пт</div>
-      <div>Сб</div>
-      <div>Вс</div>
+  <div class="container">
+    <div class="header">
+      <h1>🏢 График ПВЗ</h1>
+      <div class="stats">
+        <div class="stat-item">
+          <div class="stat-number" id="points-count">0</div>
+          <div class="stat-label">Пунктов</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number" id="employees-count">0</div>
+          <div class="stat-label">Сотрудников</div>
+        </div>
+      </div>
     </div>
-    <div class="days" id="days-container">
-      <!-- Дни будут генерироваться скриптом -->
+    
+    <div class="action-buttons">
+      <button class="btn btn-primary" onclick="showAddPointPopup()">
+        <span>➕</span> ПВЗ
+      </button>
+      <button class="btn btn-secondary" onclick="showAddEmployeePopup()">
+        <span>👤</span> Сотрудник
+      </button>
+      <button class="btn btn-success" onclick="showPointsList()">
+        <span>📍</span> Мои ПВЗ
+      </button>
+      <button class="btn btn-warning" onclick="showEmployeesList()">
+        <span>👥</span> Сотрудники
+      </button>
+    </div>
+    
+    <div class="calendar">
+      <div class="month-header">
+        <button class="month-nav" onclick="changeMonth(-1)">❮</button>
+        <div id="month-name">Январь 2026</div>
+        <button class="month-nav" onclick="changeMonth(1)">❯</button>
+      </div>
+      <div class="weekdays">
+        <div>Пн</div>
+        <div>Вт</div>
+        <div>Ср</div>
+        <div>Чт</div>
+        <div>Пт</div>
+        <div>Сб</div>
+        <div>Вс</div>
+      </div>
+      <div class="days" id="days-container">
+        <!-- Дни будут генерироваться скриптом -->
+      </div>
     </div>
   </div>
-
+  
+  <!-- Поп-ап добавления ПВЗ -->
+  <div class="popup" id="add-point-popup">
+    <div class="popup-content">
+      <div class="popup-header">
+        <h3>➕ Добавить пункт выдачи</h3>
+        <button class="popup-close" onclick="closePopup('add-point-popup')">×</button>
+      </div>
+      <div class="form-group">
+        <label for="point-name">Название ПВЗ *</label>
+        <input type="text" id="point-name" placeholder="Например: ПВЗ Центральный" maxlength="100">
+      </div>
+      <div class="form-group">
+        <label for="point-address">Адрес (опционально)</label>
+        <input type="text" id="point-address" placeholder="ул. Ленина, 10">
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-secondary" onclick="closePopup('add-point-popup')">Отмена</button>
+        <button class="btn btn-primary" onclick="addPoint()">Добавить</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Поп-ап добавления сотрудника -->
+  <div class="popup" id="add-employee-popup">
+    <div class="popup-content">
+      <div class="popup-header">
+        <h3>👤 Добавить сотрудника</h3>
+        <button class="popup-close" onclick="closePopup('add-employee-popup')">×</button>
+      </div>
+      <div class="form-group">
+        <label for="employee-name">ФИО сотрудника *</label>
+        <input type="text" id="employee-name" placeholder="Например: Иван Петров" maxlength="100">
+      </div>
+      <div class="form-group">
+        <label for="employee-phone">Телефон (опционально)</label>
+        <input type="tel" id="employee-phone" placeholder="+7 (999) 123-45-67">
+      </div>
+      <div class="form-group">
+        <label for="employee-rate">Ставка за день (₽)</label>
+        <input type="number" id="employee-rate" placeholder="1000" value="1000" min="0">
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-secondary" onclick="closePopup('add-employee-popup')">Отмена</button>
+        <button class="btn btn-primary" onclick="addEmployee()">Добавить</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Поп-ап списка ПВЗ -->
+  <div class="popup" id="points-list-popup">
+    <div class="popup-content">
+      <div class="popup-header">
+        <h3>📍 Мои пункты выдачи</h3>
+        <button class="popup-close" onclick="closePopup('points-list-popup')">×</button>
+      </div>
+      <div class="points-list" id="points-list">
+        <!-- Список ПВЗ будет генерироваться -->
+        <div style="text-align: center; color: #999; padding: 20px;">
+          Пока нет пунктов выдачи.<br>
+          Нажмите ➕ ПВЗ чтобы добавить первый.
+        </div>
+      </div>
+      <div style="margin-top: 20px; text-align: center;">
+        <button class="btn btn-primary" onclick="showAddPointPopup()">➕ Добавить ПВЗ</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Поп-ап списка сотрудников -->
+  <div class="popup" id="employees-list-popup">
+    <div class="popup-content">
+      <div class="popup-header">
+        <h3>👥 Мои сотрудники</h3>
+        <button class="popup-close" onclick="closePopup('employees-list-popup')">×</button>
+      </div>
+      <div class="employees-list" id="employees-list">
+        <!-- Список сотрудников будет генерироваться -->
+        <div style="text-align: center; color: #999; padding: 20px;">
+          Пока нет сотрудников.<br>
+          Нажмите 👤 Сотрудник чтобы добавить первого.
+        </div>
+      </div>
+      <div style="margin-top: 20px; text-align: center;">
+        <button class="btn btn-secondary" onclick="showAddEmployeePopup()">👤 Добавить сотрудника</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Поп-ап дня календаря -->
   <div class="popup" id="day-popup">
     <div class="popup-content">
-      <h3 id="popup-date">27 января</h3>
-      <p>Этот день свободен</p>
-      <button class="close-popup" onclick="closePopup()">Закрыть</button>
+      <div class="popup-header">
+        <h3 id="popup-date">27 января</h3>
+        <button class="popup-close" onclick="closePopup('day-popup')">×</button>
+      </div>
+      <div style="text-align: center; padding: 20px;">
+        <div style="font-size: 48px; margin-bottom: 10px;">📅</div>
+        <p style="color: #666; margin-bottom: 20px;">
+          Выберите сотрудника для работы в этот день
+        </p>
+        <div id="day-employees-list">
+          <!-- Список сотрудников для выбора -->
+        </div>
+      </div>
     </div>
   </div>
-
+  
+  <!-- Уведомления -->
+  <div class="toast" id="toast"></div>
+  
   <script>
-    // Генерация календаря
+    // ===== ХРАНИЛИЩЕ ДАННЫХ (localStorage) =====
+    let currentYear = new Date().getFullYear();
+    let currentMonth = new Date().getMonth();
+    let points = JSON.parse(localStorage.getItem('pvz_points')) || [];
+    let employees = JSON.parse(localStorage.getItem('pvz_employees')) || [];
+    let schedule = JSON.parse(localStorage.getItem('pvz_schedule')) || []; // { pointId, employeeId, date }
+    
+    // ===== ИНИЦИАЛИЗАЦИЯ =====
+    document.addEventListener('DOMContentLoaded', () => {
+      updateStats();
+      generateCalendar(currentYear, currentMonth);
+    });
+    
+    // ===== КАЛЕНДАРЬ =====
+    const monthNames = ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
+      "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"];
+    
     function generateCalendar(year, month) {
-      const monthNames = ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
-        "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"];
+      currentYear = year;
+      currentMonth = month;
       
       document.getElementById('month-name').textContent = `${monthNames[month]} ${year}`;
       
@@ -153,35 +585,241 @@
       for (let day = 1; day <= daysInMonth; day++) {
         const dayEl = document.createElement('div');
         dayEl.className = 'day';
-        dayEl.textContent = day;
         
-        // Случайно сделаем некоторые дни занятыми (для демо)
-        const isBusy = Math.random() > 0.6;
-        dayEl.classList.add(isBusy ? 'busy' : 'free');
+        const dayNumber = document.createElement('div');
+        dayNumber.className = 'day-number';
+        dayNumber.textContent = day;
+        dayEl.appendChild(dayNumber);
+        
+        const dateStr = formatDate(year, month, day);
+        
+        // Проверяем, есть ли запись в графике
+        const isScheduled = schedule.some(s => s.date === dateStr);
+        
+        dayEl.classList.add(isScheduled ? 'busy' : 'free');
         
         // Сегодняшний день
         if (isCurrentMonth && day === today.getDate()) {
           dayEl.classList.add('today');
         }
         
-        dayEl.onclick = () => showDayPopup(day, monthNames[month]);
+        dayEl.onclick = () => showDayPopup(day, month, year);
         
         daysContainer.appendChild(dayEl);
       }
     }
     
-    function showDayPopup(day, month) {
-      document.getElementById('popup-date').textContent = `${day} ${month}`;
-      document.getElementById('day-popup').style.display = 'flex';
+    function changeMonth(delta) {
+      currentMonth += delta;
+      if (currentMonth < 0) {
+        currentMonth = 11;
+        currentYear--;
+      } else if (currentMonth > 11) {
+        currentMonth = 0;
+        currentYear++;
+      }
+      generateCalendar(currentYear, currentMonth);
     }
     
-    function closePopup() {
-      document.getElementById('day-popup').style.display = 'none';
+    function formatDate(year, month, day) {
+      return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
     }
     
-    // Инициализация календаря на текущий месяц
-    const now = new Date();
-    generateCalendar(now.getFullYear(), now.getMonth());
+    // ===== ПОП-АП ОКНА =====
+    function showPopup(id) {
+      document.getElementById(id).classList.add('active');
+    }
+    
+    function closePopup(id) {
+      document.getElementById(id).classList.remove('active');
+    }
+    
+    function showAddPointPopup() {
+      document.getElementById('point-name').value = '';
+      document.getElementById('point-address').value = '';
+      showPopup('add-point-popup');
+    }
+    
+    function showAddEmployeePopup() {
+      document.getElementById('employee-name').value = '';
+      document.getElementById('employee-phone').value = '';
+      document.getElementById('employee-rate').value = '1000';
+      showPopup('add-employee-popup');
+    }
+    
+    function showPointsList() {
+      renderPointsList();
+      showPopup('points-list-popup');
+    }
+    
+    function showEmployeesList() {
+      renderEmployeesList();
+      showPopup('employees-list-popup');
+    }
+    
+    function showDayPopup(day, month, year) {
+      const dateStr = formatDate(year, month, day);
+      document.getElementById('popup-date').textContent = `${day} ${monthNames[month].toLowerCase()} ${year}`;
+      
+      // Генерируем список сотрудников для выбора
+      const listEl = document.getElementById('day-employees-list');
+      
+      if (employees.length === 0) {
+        listEl.innerHTML = '<p style="color: #999;">Сначала добавьте сотрудников</p>';
+      } else {
+        let html = '';
+        employees.forEach(emp => {
+          html += `
+            <div class="employee-item" onclick="assignEmployeeToDay(${emp.id}, '${dateStr}')">
+              <div>
+                <div class="employee-name">${emp.name}</div>
+                <div class="employee-phone">${emp.phone || ''}</div>
+              </div>
+              <div style="font-size: 24px;">➡️</div>
+            </div>
+          `;
+        });
+        listEl.innerHTML = html;
+      }
+      
+      showPopup('day-popup');
+    }
+    
+    // ===== ДОБАВЛЕНИЕ ПВЗ =====
+    function addPoint() {
+      const name = document.getElementById('point-name').value.trim();
+      const address = document.getElementById('point-address').value.trim();
+      
+      if (!name || name.length < 2) {
+        showToast('Название должно быть не менее 2 символов', 'error');
+        return;
+      }
+      
+      const newPoint = {
+        id: points.length > 0 ? Math.max(...points.map(p => p.id)) + 1 : 1,
+        name: name,
+        address: address
+      };
+      
+      points.push(newPoint);
+      localStorage.setItem('pvz_points', JSON.stringify(points));
+      
+      closePopup('add-point-popup');
+      showToast('✅ ПВЗ добавлен!', 'success');
+      updateStats();
+      renderPointsList();
+    }
+    
+    // ===== ДОБАВЛЕНИЕ СОТРУДНИКА =====
+    function addEmployee() {
+      const name = document.getElementById('employee-name').value.trim();
+      const phone = document.getElementById('employee-phone').value.trim();
+      const rate = parseFloat(document.getElementById('employee-rate').value) || 1000;
+      
+      if (!name || name.length < 2) {
+        showToast('ФИО должно быть не менее 2 символов', 'error');
+        return;
+      }
+      
+      const newEmployee = {
+        id: employees.length > 0 ? Math.max(...employees.map(e => e.id)) + 1 : 1,
+        name: name,
+        phone: phone,
+        rate: rate
+      };
+      
+      employees.push(newEmployee);
+      localStorage.setItem('pvz_employees', JSON.stringify(employees));
+      
+      closePopup('add-employee-popup');
+      showToast('✅ Сотрудник добавлен!', 'success');
+      updateStats();
+      renderEmployeesList();
+    }
+    
+    // ===== НАЗНАЧЕНИЕ СОТРУДНИКА НА ДЕНЬ =====
+    function assignEmployeeToDay(employeeId, dateStr) {
+      // Пока просто показываем уведомление
+      const employee = employees.find(e => e.id === employeeId);
+      showToast(`📅 ${employee.name} назначен на ${dateStr}`, 'success');
+      closePopup('day-popup');
+    }
+    
+    // ===== ОТОБРАЖЕНИЕ СПИСКОВ =====
+    function renderPointsList() {
+      const listEl = document.getElementById('points-list');
+      
+      if (points.length === 0) {
+        listEl.innerHTML = `
+          <div style="text-align: center; color: #999; padding: 20px;">
+            Пока нет пунктов выдачи.<br>
+            Нажмите ➕ ПВЗ чтобы добавить первый.
+          </div>
+        `;
+        return;
+      }
+      
+      let html = '';
+      points.forEach(point => {
+        html += `
+          <div class="point-item">
+            <div>
+              <div class="point-name">${point.name}</div>
+              <div class="point-count">${point.address || 'Без адреса'}</div>
+            </div>
+            <div style="font-size: 24px;">➡️</div>
+          </div>
+        `;
+      });
+      
+      listEl.innerHTML = html;
+    }
+    
+    function renderEmployeesList() {
+      const listEl = document.getElementById('employees-list');
+      
+      if (employees.length === 0) {
+        listEl.innerHTML = `
+          <div style="text-align: center; color: #999; padding: 20px;">
+            Пока нет сотрудников.<br>
+            Нажмите 👤 Сотрудник чтобы добавить первого.
+          </div>
+        `;
+        return;
+      }
+      
+      let html = '';
+      employees.forEach(emp => {
+        html += `
+          <div class="employee-item">
+            <div>
+              <div class="employee-name">${emp.name}</div>
+              <div class="employee-phone">${emp.phone || ''} • ${emp.rate}₽/день</div>
+            </div>
+            <div style="font-size: 24px;">➡️</div>
+          </div>
+        `;
+      });
+      
+      listEl.innerHTML = html;
+    }
+    
+    // ===== СТАТИСТИКА =====
+    function updateStats() {
+      document.getElementById('points-count').textContent = points.length;
+      document.getElementById('employees-count').textContent = employees.length;
+    }
+    
+    // ===== УВЕДОМЛЕНИЯ =====
+    function showToast(message, type = 'success') {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.className = `toast ${type} show`;
+      
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3000);
+    }
   </script>
 </body>
 </html>
