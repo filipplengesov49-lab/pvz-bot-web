@@ -13,7 +13,7 @@
     }
     
     body {
-      background: #e0f2fe; /* Светло-голубой фон */
+      background: #f0f9ff; /* Светло-голубой фон */
       color: #1e293b;
       min-height: 100vh;
       padding: 20px;
@@ -42,7 +42,7 @@
     }
     
     .stat-item {
-      background: #f0f9ff;
+      background: #dbeafe;
       padding: 12px;
       border-radius: 8px;
       text-align: center;
@@ -94,27 +94,31 @@
     }
     
     .btn-primary {
-      background: #3b82f6;
+      background: #1e40af; /* Тёмно-синий для ПВЗ */
     }
     
     .btn-secondary {
-      background: #60a5fa;
+      background: #15803d; /* Тёмно-зелёный для сотрудников */
     }
     
     .btn-success {
-      background: #22c55e;
+      background: #1e40af; /* Тёмно-синий для ПВЗ */
     }
     
     .btn-warning {
-      background: #f59e0b;
+      background: #15803d; /* Тёмно-зелёный для сотрудников */
     }
     
     .btn-danger {
-      background: #ef4444;
+      background: #b91c1c;
     }
     
     .btn-back {
       background: #94a3b8;
+    }
+    
+    .btn-edit {
+      background: #f59e0b;
     }
     
     .calendar-container {
@@ -138,7 +142,7 @@
     }
     
     .calendar {
-      background: #f8fafc;
+      background: white;
       border-radius: 12px;
       padding: 20px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.05);
@@ -156,7 +160,7 @@
     }
     
     .month-nav {
-      background: #3b82f6;
+      background: #1e40af;
       border: none;
       font-size: 18px;
       cursor: pointer;
@@ -172,7 +176,7 @@
     }
     
     .month-nav:hover {
-      background: #2563eb;
+      background: #1d4ed8;
     }
     
     .weekdays {
@@ -358,7 +362,7 @@
     }
     
     .point-item, .employee-item {
-      background: #f8fafc;
+      background: white;
       padding: 12px 15px;
       border-radius: 8px;
       display: flex;
@@ -370,7 +374,7 @@
     }
     
     .point-item:hover, .employee-item:hover {
-      background: #f1f5f9;
+      background: #f8fafc;
       border-color: #cbd5e1;
     }
     
@@ -393,18 +397,19 @@
     .point-actions, .employee-actions {
       display: flex;
       gap: 8px;
+      min-width: 90px; /* Фиксированная ширина для выравнивания */
     }
     
     .action-btn {
-      width: 32px;
-      height: 32px;
+      width: 36px; /* Увеличенная ширина для выравнивания */
+      height: 36px; /* Увеличенная высота для выравнивания */
       border-radius: 8px;
       border: none;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 14px;
+      font-size: 16px;
       transition: all 0.2s;
     }
     
@@ -414,8 +419,13 @@
     }
     
     .action-btn.calendar {
-      background: #dcfce7;
-      color: #155e75;
+      background: #dbeafe;
+      color: #1e40af;
+    }
+    
+    .action-btn.edit {
+      background: #fef3c7;
+      color: #b45309;
     }
     
     .toast {
@@ -502,9 +512,9 @@
     }
     
     .tag-btn.selected {
-      background: #3b82f6;
+      background: #1e40af;
       color: white;
-      border-color: #3b82f6;
+      border-color: #1e40af;
     }
     
     .tag-btn:hover {
@@ -523,7 +533,7 @@
     }
     
     .no-calendar {
-      background: #f8fafc;
+      background: white;
       border-radius: 12px;
       padding: 30px 20px;
       text-align: center;
@@ -627,11 +637,11 @@
     </div>
   </div>
   
-  <!-- Поп-ап добавления ПВЗ -->
+  <!-- Поп-ап добавления/редактирования ПВЗ -->
   <div class="popup" id="add-point-popup">
     <div class="popup-content">
       <div class="popup-header">
-        <h3>Добавить пункт выдачи</h3>
+        <h3 id="point-popup-title">Добавить пункт выдачи</h3>
         <button class="popup-close" onclick="closePopup('add-point-popup')">×</button>
       </div>
       <div class="form-group">
@@ -644,16 +654,16 @@
       </div>
       <div class="form-actions">
         <button class="btn btn-back" onclick="closePopup('add-point-popup')">Отмена</button>
-        <button class="btn btn-primary" onclick="addPoint()">Добавить</button>
+        <button class="btn btn-primary" id="point-save-btn" onclick="savePoint()">Добавить</button>
       </div>
     </div>
   </div>
   
-  <!-- Поп-ап добавления сотрудника -->
+  <!-- Поп-ап добавления/редактирования сотрудника -->
   <div class="popup" id="add-employee-popup">
     <div class="popup-content">
       <div class="popup-header">
-        <h3>Добавить сотрудника</h3>
+        <h3 id="employee-popup-title">Добавить сотрудника</h3>
         <button class="popup-close" onclick="closePopup('add-employee-popup')">×</button>
       </div>
       <div class="form-group">
@@ -677,7 +687,7 @@
       </div>
       <div class="form-actions">
         <button class="btn btn-back" onclick="closePopup('add-employee-popup')">Отмена</button>
-        <button class="btn btn-secondary" onclick="addEmployee()">Добавить</button>
+        <button class="btn btn-secondary" id="employee-save-btn" onclick="saveEmployee()">Добавить</button>
       </div>
     </div>
   </div>
@@ -780,6 +790,8 @@
     let employees = JSON.parse(localStorage.getItem('pvz_employees')) || [];
     let schedule = JSON.parse(localStorage.getItem('pvz_schedule')) || []; // { pointId, employeeId, date }
     let employeeTags = JSON.parse(localStorage.getItem('pvz_employee_tags')) || {}; // { employeeId: [pointId1, pointId2] }
+    let editingPointId = null; // ID редактируемого пункта
+    let editingEmployeeId = null; // ID редактируемого сотрудника
     
     // ===== ИНИЦИАЛИЗАЦИЯ =====
     document.addEventListener('DOMContentLoaded', () => {
@@ -899,15 +911,121 @@
     }
     
     function showAddPointPopup() {
+      editingPointId = null;
       document.getElementById('point-name').value = '';
       document.getElementById('point-address').value = '';
+      document.getElementById('point-popup-title').textContent = 'Добавить пункт выдачи';
+      document.getElementById('point-save-btn').textContent = 'Добавить';
+      document.getElementById('point-save-btn').className = 'btn btn-primary';
       showPopup('add-point-popup');
     }
     
+    function showEditPointPopup(pointId) {
+      const point = points.find(p => p.id === pointId);
+      if (!point) return;
+      
+      editingPointId = pointId;
+      document.getElementById('point-name').value = point.name;
+      document.getElementById('point-address').value = point.address;
+      document.getElementById('point-popup-title').textContent = 'Редактировать пункт выдачи';
+      document.getElementById('point-save-btn').textContent = 'Сохранить';
+      document.getElementById('point-save-btn').className = 'btn btn-edit';
+      showPopup('add-point-popup');
+    }
+    
+    function savePoint() {
+      const name = document.getElementById('point-name').value.trim();
+      const address = document.getElementById('point-address').value.trim();
+      
+      if (!name || name.length < 2) {
+        showToast('Название должно быть не менее 2 символов', 'error');
+        return;
+      }
+      
+      if (!address || address.length < 5) {
+        showToast('Адрес ПВЗ должен быть не менее 5 символов', 'error');
+        return;
+      }
+      
+      if (editingPointId) {
+        // Редактирование существующего пункта
+        const index = points.findIndex(p => p.id === editingPointId);
+        if (index !== -1) {
+          points[index].name = name;
+          points[index].address = address;
+          localStorage.setItem('pvz_points', JSON.stringify(points));
+          closePopup('add-point-popup');
+          showToast('✅ Пункт выдачи обновлён!', 'success');
+          renderPointsList();
+          updateCalendarView();
+        }
+      } else {
+        // Добавление нового пункта
+        addPoint();
+      }
+    }
+    
+    function addPoint() {
+      const name = document.getElementById('point-name').value.trim();
+      const address = document.getElementById('point-address').value.trim();
+      
+      if (!name || name.length < 2) {
+        showToast('Название должно быть не менее 2 символов', 'error');
+        return;
+      }
+      
+      if (!address || address.length < 5) {
+        showToast('Адрес ПВЗ должен быть не менее 5 символов', 'error');
+        return;
+      }
+      
+      // Проверка на дубликат
+      const existingPoint = points.find(p => 
+        p.name.toLowerCase() === name.toLowerCase() || 
+        p.address.toLowerCase() === address.toLowerCase()
+      );
+      
+      if (existingPoint) {
+        document.getElementById('confirm-duplicate-message').textContent = 
+          `Пункт с названием "${name}" или адресом "${address}" уже существует. Добавить ещё раз?`;
+        
+        document.getElementById('confirm-add-btn').onclick = () => {
+          doAddPoint(name, address);
+          closePopup('confirm-duplicate-popup');
+        };
+        
+        showPopup('confirm-duplicate-popup');
+        return;
+      }
+      
+      doAddPoint(name, address);
+    }
+    
+    function doAddPoint(name, address) {
+      const newPoint = {
+        id: points.length > 0 ? Math.max(...points.map(p => p.id)) + 1 : 1,
+        name: name,
+        address: address
+      };
+      
+      points.push(newPoint);
+      localStorage.setItem('pvz_points', JSON.stringify(points));
+      
+      closePopup('add-point-popup');
+      showToast('✅ ПВЗ добавлен!', 'success');
+      updateStats();
+      renderPointsList();
+      updateCalendarView();
+    }
+    
     function showAddEmployeePopup() {
+      editingEmployeeId = null;
       document.getElementById('employee-name').value = '';
       document.getElementById('employee-phone').value = '';
       document.getElementById('employee-rate').value = '1000';
+      document.getElementById('employee-popup-title').textContent = 'Добавить сотрудника';
+      document.getElementById('employee-save-btn').textContent = 'Добавить';
+      document.getElementById('employee-save-btn').className = 'btn btn-secondary';
       
       // Генерируем теги для пунктов
       const tagsContainer = document.getElementById('point-tags-selector');
@@ -926,6 +1044,133 @@
       }
       
       showPopup('add-employee-popup');
+    }
+    
+    function showEditEmployeePopup(employeeId) {
+      const employee = employees.find(e => e.id === employeeId);
+      if (!employee) return;
+      
+      editingEmployeeId = employeeId;
+      document.getElementById('employee-name').value = employee.name;
+      document.getElementById('employee-phone').value = employee.phone || '';
+      document.getElementById('employee-rate').value = employee.rate;
+      document.getElementById('employee-popup-title').textContent = 'Редактировать сотрудника';
+      document.getElementById('employee-save-btn').textContent = 'Сохранить';
+      document.getElementById('employee-save-btn').className = 'btn btn-edit';
+      
+      // Генерируем теги для пунктов
+      const tagsContainer = document.getElementById('point-tags-selector');
+      if (points.length === 0) {
+        tagsContainer.innerHTML = '<p style="color: #94a3b8;">Сначала добавьте пункты выдачи</p>';
+      } else {
+        let html = '';
+        points.forEach(point => {
+          const isSelected = employeeTags[employeeId] && employeeTags[employeeId].includes(point.id);
+          html += `
+            <button class="tag-btn ${isSelected ? 'selected' : ''}" onclick="toggleTag(this, ${point.id})">
+              ${point.name}
+            </button>
+          `;
+        });
+        tagsContainer.innerHTML = html;
+      }
+      
+      showPopup('add-employee-popup');
+    }
+    
+    function saveEmployee() {
+      const name = document.getElementById('employee-name').value.trim();
+      const phone = document.getElementById('employee-phone').value.trim();
+      const rate = parseFloat(document.getElementById('employee-rate').value) || 1000;
+      
+      if (!name || name.length < 2) {
+        showToast('ФИО должно быть не менее 2 символов', 'error');
+        return;
+      }
+      
+      if (editingEmployeeId) {
+        // Редактирование существующего сотрудника
+        const index = employees.findIndex(e => e.id === editingEmployeeId);
+        if (index !== -1) {
+          employees[index].name = name;
+          employees[index].phone = phone;
+          employees[index].rate = rate;
+          
+          // Обновляем теги
+          const selectedTags = Array.from(document.querySelectorAll('#point-tags-selector .tag-btn.selected'));
+          const tags = selectedTags.map(btn => parseInt(btn.getAttribute('onclick').match(/\d+/)[0]));
+          if (tags.length > 0) {
+            employeeTags[editingEmployeeId] = tags;
+          } else {
+            delete employeeTags[editingEmployeeId];
+          }
+          
+          localStorage.setItem('pvz_employees', JSON.stringify(employees));
+          localStorage.setItem('pvz_employee_tags', JSON.stringify(employeeTags));
+          
+          closePopup('add-employee-popup');
+          showToast('✅ Сотрудник обновлён!', 'success');
+          renderEmployeesList();
+        }
+      } else {
+        // Добавление нового сотрудника
+        addEmployee();
+      }
+    }
+    
+    function addEmployee() {
+      const name = document.getElementById('employee-name').value.trim();
+      const phone = document.getElementById('employee-phone').value.trim();
+      const rate = parseFloat(document.getElementById('employee-rate').value) || 1000;
+      
+      if (!name || name.length < 2) {
+        showToast('ФИО должно быть не менее 2 символов', 'error');
+        return;
+      }
+      
+      // Проверка на дубликат по имени
+      const existingEmployee = employees.find(e => e.name.toLowerCase() === name.toLowerCase());
+      
+      if (existingEmployee) {
+        document.getElementById('confirm-duplicate-message').textContent = 
+          `Сотрудник "${name}" уже существует. Добавить ещё раз?`;
+        
+        document.getElementById('confirm-add-btn').onclick = () => {
+          doAddEmployee(name, phone, rate);
+          closePopup('confirm-duplicate-popup');
+        };
+        
+        showPopup('confirm-duplicate-popup');
+        return;
+      }
+      
+      doAddEmployee(name, phone, rate);
+    }
+    
+    function doAddEmployee(name, phone, rate) {
+      const newEmployee = {
+        id: employees.length > 0 ? Math.max(...employees.map(e => e.id)) + 1 : 1,
+        name: name,
+        phone: phone,
+        rate: rate
+      };
+      
+      employees.push(newEmployee);
+      
+      // Сохраняем теги
+      const selectedTags = Array.from(document.querySelectorAll('#point-tags-selector .tag-btn.selected'));
+      const tags = selectedTags.map(btn => parseInt(btn.getAttribute('onclick').match(/\d+/)[0]));
+      if (tags.length > 0) {
+        employeeTags[newEmployee.id] = tags;
+      }
+      
+      localStorage.setItem('pvz_employees', JSON.stringify(employees));
+      localStorage.setItem('pvz_employee_tags', JSON.stringify(employeeTags));
+      
+      closePopup('add-employee-popup');
+      showToast('✅ Сотрудник добавлен!', 'success');
+      updateStats();
+      renderEmployeesList();
     }
     
     function toggleTag(btn, pointId) {
@@ -994,116 +1239,6 @@
       }
       
       showPopup('day-popup');
-    }
-    
-    // ===== ДОБАВЛЕНИЕ ПВЗ =====
-    function addPoint() {
-      const name = document.getElementById('point-name').value.trim();
-      const address = document.getElementById('point-address').value.trim();
-      
-      if (!name || name.length < 2) {
-        showToast('Название должно быть не менее 2 символов', 'error');
-        return;
-      }
-      
-      if (!address || address.length < 5) {
-        showToast('Адрес ПВЗ должен быть не менее 5 символов', 'error');
-        return;
-      }
-      
-      // Проверка на дубликат
-      const existingPoint = points.find(p => 
-        p.name.toLowerCase() === name.toLowerCase() || 
-        p.address.toLowerCase() === address.toLowerCase()
-      );
-      
-      if (existingPoint) {
-        document.getElementById('confirm-duplicate-message').textContent = 
-          `Пункт с названием "${name}" или адресом "${address}" уже существует. Добавить ещё раз?`;
-        
-        document.getElementById('confirm-add-btn').onclick = () => {
-          doAddPoint(name, address);
-          closePopup('confirm-duplicate-popup');
-        };
-        
-        showPopup('confirm-duplicate-popup');
-        return;
-      }
-      
-      doAddPoint(name, address);
-    }
-    
-    function doAddPoint(name, address) {
-      const newPoint = {
-        id: points.length > 0 ? Math.max(...points.map(p => p.id)) + 1 : 1,
-        name: name,
-        address: address
-      };
-      
-      points.push(newPoint);
-      localStorage.setItem('pvz_points', JSON.stringify(points));
-      
-      closePopup('add-point-popup');
-      showToast('✅ ПВЗ добавлен!', 'success');
-      updateStats();
-      renderPointsList();
-      updateCalendarView();
-    }
-    
-    // ===== ДОБАВЛЕНИЕ СОТРУДНИКА =====
-    function addEmployee() {
-      const name = document.getElementById('employee-name').value.trim();
-      const phone = document.getElementById('employee-phone').value.trim();
-      const rate = parseFloat(document.getElementById('employee-rate').value) || 1000;
-      
-      if (!name || name.length < 2) {
-        showToast('ФИО должно быть не менее 2 символов', 'error');
-        return;
-      }
-      
-      // Проверка на дубликат по имени
-      const existingEmployee = employees.find(e => e.name.toLowerCase() === name.toLowerCase());
-      
-      if (existingEmployee) {
-        document.getElementById('confirm-duplicate-message').textContent = 
-          `Сотрудник "${name}" уже существует. Добавить ещё раз?`;
-        
-        document.getElementById('confirm-add-btn').onclick = () => {
-          doAddEmployee(name, phone, rate);
-          closePopup('confirm-duplicate-popup');
-        };
-        
-        showPopup('confirm-duplicate-popup');
-        return;
-      }
-      
-      doAddEmployee(name, phone, rate);
-    }
-    
-    function doAddEmployee(name, phone, rate) {
-      const newEmployee = {
-        id: employees.length > 0 ? Math.max(...employees.map(e => e.id)) + 1 : 1,
-        name: name,
-        phone: phone,
-        rate: rate
-      };
-      
-      employees.push(newEmployee);
-      
-      // Сохраняем теги
-      const selectedTags = Array.from(document.querySelectorAll('#point-tags-selector .tag-btn.selected'));
-      const tags = selectedTags.map(btn => parseInt(btn.getAttribute('onclick').match(/\d+/)[0]));
-      if (tags.length > 0) {
-        employeeTags[newEmployee.id] = tags;
-      }
-      
-      localStorage.setItem('pvz_employees', JSON.stringify(employees));
-      localStorage.setItem('pvz_employee_tags', JSON.stringify(employeeTags));
-      
-      closePopup('add-employee-popup');
-      showToast('✅ Сотрудник добавлен!', 'success');
-      updateStats();
-      renderEmployeesList();
     }
     
     // ===== УДАЛЕНИЕ ПВЗ =====
@@ -1279,6 +1414,7 @@
               <div class="point-address">${point.address}</div>
             </div>
             <div class="point-actions">
+              <button class="action-btn edit" title="Редактировать" onclick="showEditPointPopup(${point.id})">✏️</button>
               <button class="action-btn calendar" title="Редактировать" onclick="selectPointForEditing(${point.id})">📅</button>
               <button class="action-btn delete" title="Удалить" onclick="confirmDeletePoint(${point.id})">🗑️</button>
             </div>
@@ -1307,7 +1443,7 @@
         const empTags = employeeTags[emp.id] || [];
         const tagsHtml = empTags.map(pid => {
           const p = points.find(p => p.id === pid);
-          return p ? `<span style="background: #3b82f6; color: white; padding: 2px 6px; border-radius: 8px; font-size: 11px; margin-right: 4px;">${p.name}</span>` : '';
+          return p ? `<span style="background: #1e40af; color: white; padding: 2px 6px; border-radius: 8px; font-size: 11px; margin-right: 4px;">${p.name}</span>` : '';
         }).join('');
         
         html += `
@@ -1320,6 +1456,7 @@
               </div>
             </div>
             <div class="employee-actions">
+              <button class="action-btn edit" title="Редактировать" onclick="showEditEmployeePopup(${emp.id})">✏️</button>
               <button class="action-btn delete" title="Удалить" onclick="confirmDeleteEmployee(${emp.id})">🗑️</button>
             </div>
           </div>
