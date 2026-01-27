@@ -638,6 +638,10 @@
       color: #1e40af !important;
     }
     
+    .report-total td:first-child {
+      text-align: right;
+    }
+    
     .date-picker {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -924,7 +928,9 @@
             </tbody>
             <tfoot>
               <tr class="report-total">
-                <td colspan="3" style="text-align: right;">ВСЕГО:</td>
+                <td></td>
+                <td></td>
+                <td style="text-align: right;">ВСЕГО:</td>
                 <td id="report-total-count">0</td>
                 <td id="report-total-sum">0 ₽</td>
               </tr>
@@ -1651,7 +1657,7 @@
         }
       });
       
-      const csvContent = data.map(row => row.join(',')).join('\n');
+      const csvContent = data.map(row => row.join(',')).join('\r\n');
       
       const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
@@ -1790,46 +1796,47 @@
     
     function exportReportToExcel() {
       const table = document.getElementById('report-table');
-      const rows = table.querySelectorAll('tr');
-      
-      if (rows.length <= 2) {
-        showToast('Нет данных для экспорта', 'error');
-        return;
-      }
-      
-      // Собираем данные
-      const reportData = [];
+      const headers = [];
+      const dataRows = [];
+      const totalRow = [];
       
       // Заголовки
-      const headers = [];
-      rows[0].querySelectorAll('th').forEach(th => {
-        headers.push(th.textContent);
+      table.querySelectorAll('thead th').forEach(th => {
+        headers.push(th.textContent.trim());
       });
-      reportData.push(headers);
       
       // Данные
-      for (let i = 1; i < rows.length - 1; i++) {
+      table.querySelectorAll('tbody tr').forEach(tr => {
         const rowData = [];
-        rows[i].querySelectorAll('td').forEach(td => {
-          rowData.push(td.textContent);
+        tr.querySelectorAll('td').forEach(td => {
+          rowData.push(td.textContent.trim());
         });
-        reportData.push(rowData);
-      }
+        dataRows.push(rowData);
+      });
+      
+      // Итоги (5 ячеек)
+      table.querySelector('tfoot tr').querySelectorAll('td').forEach(td => {
+        totalRow.push(td.textContent.trim());
+      });
+      
+      // Формируем CSV с правильным разделителем строк \r\n
+      let csvContent = '';
+      
+      // Заголовки
+      csvContent += headers.map(cell => `"${cell.replace(/"/g, '""')}"`).join(',') + '\r\n';
+      
+      // Данные
+      dataRows.forEach(row => {
+        csvContent += row.map(cell => `"${cell.replace(/"/g, '""')}"`).join(',') + '\r\n';
+      });
+      
+      // Пустая строка
+      csvContent += '\r\n';
       
       // Итоги
-      const totalRow = [];
-      rows[rows.length - 1].querySelectorAll('td').forEach(td => {
-        totalRow.push(td.textContent);
-      });
-      reportData.push(['', '', '', '', '']);
-      reportData.push(['ИТОГО:', '', ...totalRow.slice(2)]);
+      csvContent += totalRow.map(cell => `"${cell.replace(/"/g, '""')}"`).join(',') + '\r\n';
       
-      // Создаём CSV
-      const csvContent = reportData.map(row => 
-        row.map(cell => `"${cell.replace(/"/g, '""')}"`).join(',')
-      ).join('\n');
-      
-      // Скачиваем файл
+      // Создаём Blob и скачиваем
       const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
