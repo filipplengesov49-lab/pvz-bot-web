@@ -397,20 +397,23 @@
     .point-actions, .employee-actions {
       display: flex;
       gap: 8px;
-      min-width: 90px; /* Фиксированная ширина для выравнивания */
+      min-width: 100px; /* Фиксированная ширина для выравнивания */
+      justify-content: flex-end; /* Выравниваем по правому краю */
     }
     
     .action-btn {
-      width: 36px; /* Увеличенная ширина для выравнивания */
-      height: 36px; /* Увеличенная высота для выравнивания */
+      width: 36px !important; /* Важно: фиксированная ширина */
+      height: 36px !important; /* Важно: фиксированная высота */
       border-radius: 8px;
       border: none;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 16px;
+      font-size: 16px !important;
       transition: all 0.2s;
+      padding: 0 !important; /* Убираем внутренние отступы */
+      line-height: 1 !important; /* Убираем лишние пробелы */
     }
     
     .action-btn.delete {
@@ -667,11 +670,11 @@
         <button class="popup-close" onclick="closePopup('add-employee-popup')">×</button>
       </div>
       <div class="form-group">
-        <label for="employee-name">ФИО сотрудника</label>
+        <label for="employee-name">ФИО сотрудника *</label>
         <input type="text" id="employee-name" placeholder="Например: Иван Петров" maxlength="100">
       </div>
       <div class="form-group">
-        <label for="employee-phone">Номер телефона</label>
+        <label for="employee-phone">Телефон (опционально)</label>
         <input type="tel" id="employee-phone" placeholder="+7 (123) 456-78-90" maxlength="20" 
                oninput="validatePhone(this)">
       </div>
@@ -1530,4 +1533,3 @@
   </script>
 </body>
 </html>
-
