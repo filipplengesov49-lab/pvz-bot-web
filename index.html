@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Админ Панель ПВЗ</title>
   <style>
-    /* ===== БАЗОВЫЕ СТИЛИ ===== */
     * {
       margin: 0;
       padding: 0;
@@ -26,7 +25,6 @@
       margin: 0 auto;
     }
     
-    /* ===== ХЕДЕР И СТАТИСТИКА ===== */
     .header {
       background: white;
       border-radius: 12px;
@@ -62,7 +60,6 @@
       margin-top: 4px;
     }
     
-    /* ===== КНОПКИ ДЕЙСТВИЙ ===== */
     .action-buttons {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -104,7 +101,6 @@
     .btn-back { background: #94a3b8; }
     .btn-edit { background: #f59e0b; }
     
-    /* ===== КАЛЕНДАРЬ ===== */
     .calendar-container {
       background: white;
       border-radius: 12px;
@@ -255,7 +251,6 @@
       z-index: 1;
     }
     
-    /* ===== ПОП-АП ОКНА ===== */
     .popup {
       position: fixed;
       top: 0; left: 0;
@@ -321,7 +316,6 @@
       color: #1e293b;
     }
     
-    /* ===== ФОРМЫ ===== */
     .form-group {
       margin-bottom: 18px;
     }
@@ -359,7 +353,6 @@
       margin-top: 15px;
     }
     
-    /* ===== СПИСКИ ПУНКТОВ И СОТРУДНИКОВ ===== */
     .points-list, .employees-list {
       display: flex;
       flex-direction: column;
@@ -433,7 +426,6 @@
       color: #b45309;
     }
     
-    /* ===== УВЕДОМЛЕНИЯ ===== */
     .toast {
       position: fixed;
       bottom: 20px;
@@ -458,7 +450,6 @@
     .toast.error { border-left-color: #ef4444; }
     .toast.warning { border-left-color: #f59e0b; }
     
-    /* ===== ПОДТВЕРЖДЕНИЯ ===== */
     .confirm-popup {
       text-align: center;
       padding: 20px 0;
@@ -476,7 +467,6 @@
       gap: 10px;
     }
     
-    /* ===== ПУСТЫЕ СОСТОЯНИЯ ===== */
     .empty-state {
       text-align: center;
       color: #94a3b8;
@@ -493,7 +483,6 @@
       font-size: 14px;
     }
     
-    /* ===== ТЕГИ СОТРУДНИКОВ ===== */
     .tag-selector {
       display: flex;
       flex-wrap: wrap;
@@ -533,7 +522,6 @@
       font-weight: 500;
     }
     
-    /* ===== КАЛЕНДАРЬ НЕДОСТУПЕН ===== */
     .no-calendar {
       background: white;
       border-radius: 12px;
@@ -571,7 +559,6 @@
       background: #1e40af;
     }
     
-    /* ===== СЕКЦИЯ ЭКСПОРТА ===== */
     .export-section {
       background: white;
       border-radius: 12px;
@@ -588,21 +575,24 @@
       background: #031D5B;
     }
     
-    /* ===== ТАБЛИЦА ОТЧЁТА (УЛУЧШЕННАЯ) ===== */
+    /* ===== ТАБЛИЦА ОТЧЁТА (ИСПРАВЛЕНО) ===== */
     .report-table-container {
       max-height: 400px;
       overflow-y: auto;
+      overflow-x: auto; /* Горизонтальная прокрутка при широкой таблице */
       border: 1px solid #e2e8f0;
       border-radius: 8px;
       margin-top: 15px;
       background: white;
+      width: 100%;
     }
     
     table {
-      width: 100%;
+      width: auto; /* Автоматическая ширина под содержимое */
+      min-width: 100%; /* Минимум на ширину контейнера */
       border-collapse: collapse;
       background: white;
-      table-layout: auto; /* Автоматическая ширина колонок под содержимое */
+      table-layout: auto; /* Автоматическая подгонка колонок */
     }
     
     th, td {
@@ -610,21 +600,14 @@
       padding: 10px 12px;
       text-align: left;
       font-size: 14px;
-      vertical-align: middle; /* Выравнивание по центру по вертикали */
-      word-wrap: break-word; /* Перенос длинных слов */
+      vertical-align: middle;
+      white-space: nowrap; /* ЗАПРЕТ ПЕРЕНОСА ТЕКСТА ВО ВСЕХ ЯЧЕЙКАХ */
+      word-wrap: normal;
     }
     
-    /* Текстовые колонки (1-2): разрешаем перенос, выравниваем по верху */
-    th:first-child, td:first-child,
-    th:nth-child(2), td:nth-child(2) {
-      vertical-align: top;
-      white-space: normal;
-    }
-    
-    /* Числовые колонки (3-5): запрещаем перенос, выравниваем по правому краю */
+    /* Числовые колонки: выравнивание по правому краю */
     th:nth-child(3), th:nth-child(4), th:nth-child(5),
     td:nth-child(3), td:nth-child(4), td:nth-child(5) {
-      white-space: nowrap; /* Запрет переноса для чисел и итогов */
       text-align: right;
     }
     
@@ -632,7 +615,6 @@
       background: #dbeafe;
       font-weight: 600;
       color: #1e40af;
-      white-space: nowrap; /* Заголовки в одну строку */
       position: sticky;
       top: 0;
       z-index: 10;
@@ -652,16 +634,10 @@
       color: #1e40af !important;
     }
     
-    .report-total td {
-      vertical-align: middle !important;
-    }
-    
-    /* Ячейка "ВСЕГО:" выравнивается по правому краю */
     .report-total td:nth-child(3) {
       text-align: right !important;
     }
     
-    /* ===== ВЫБОР ДАТЫ ===== */
     .date-picker {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -762,7 +738,7 @@
     </div>
   </div>
   
-  <!-- Поп-ап добавления/редактирования ПВЗ (ТОЛЬКО АДРЕС) -->
+  <!-- Поп-ап добавления/редактирования ПВЗ -->
   <div class="popup" id="add-point-popup">
     <div class="popup-content">
       <div class="popup-header">
@@ -770,8 +746,12 @@
         <button class="popup-close" onclick="closePopup('add-point-popup')">×</button>
       </div>
       <div class="form-group">
+        <label for="point-name">Название пункта выдачи *</label>
+        <input type="text" id="point-name" placeholder="Например: ПВЗ Центральный" maxlength="100">
+      </div>
+      <div class="form-group">
         <label for="point-address">Адрес пункта выдачи *</label>
-        <input type="text" id="point-address" placeholder="ул. Ленина, 10" maxlength="200">
+        <input type="text" id="point-address" placeholder="ул. Ленина, 10">
       </div>
       <div class="form-actions">
         <button class="btn btn-back" onclick="closePopup('add-point-popup')">Отмена</button>
@@ -1089,9 +1069,10 @@
       document.getElementById(id).classList.remove('active');
     }
     
-    // ===== ФУНКЦИИ ПВЗ (ТОЛЬКО АДРЕС) =====
+    // ===== ФУНКЦИИ ПВЗ =====
     function showAddPointPopup() {
       editingPointId = null;
+      document.getElementById('point-name').value = '';
       document.getElementById('point-address').value = '';
       document.getElementById('point-popup-title').textContent = 'Добавить пункт выдачи';
       document.getElementById('point-save-btn').textContent = 'Добавить';
@@ -1104,6 +1085,7 @@
       if (!point) return;
       
       editingPointId = pointId;
+      document.getElementById('point-name').value = point.name;
       document.getElementById('point-address').value = point.address;
       document.getElementById('point-popup-title').textContent = 'Редактировать пункт выдачи';
       document.getElementById('point-save-btn').textContent = 'Сохранить';
@@ -1114,7 +1096,13 @@
     }
     
     function savePoint() {
+      const name = document.getElementById('point-name').value.trim();
       const address = document.getElementById('point-address').value.trim();
+      
+      if (!name || name.length < 2) {
+        showToast('Название должно быть не менее 2 символов', 'error');
+        return;
+      }
       
       if (!address || address.length < 5) {
         showToast('Адрес ПВЗ должен быть не менее 5 символов', 'error');
@@ -1124,7 +1112,7 @@
       if (editingPointId) {
         const index = points.findIndex(p => p.id === editingPointId);
         if (index !== -1) {
-          points[index].name = address;
+          points[index].name = name;
           points[index].address = address;
           localStorage.setItem('pvz_points', JSON.stringify(points));
           closePopup('add-point-popup');
@@ -1138,21 +1126,30 @@
     }
     
     function addPoint() {
+      const name = document.getElementById('point-name').value.trim();
       const address = document.getElementById('point-address').value.trim();
+      
+      if (!name || name.length < 2) {
+        showToast('Название должно быть не менее 2 символов', 'error');
+        return;
+      }
       
       if (!address || address.length < 5) {
         showToast('Адрес ПВЗ должен быть не менее 5 символов', 'error');
         return;
       }
       
-      const existingPoint = points.find(p => p.address.toLowerCase() === address.toLowerCase());
+      const existingPoint = points.find(p => 
+        p.name.toLowerCase() === name.toLowerCase() || 
+        p.address.toLowerCase() === address.toLowerCase()
+      );
       
       if (existingPoint) {
         document.getElementById('confirm-duplicate-message').textContent = 
-          `Пункт с адресом "${address}" уже существует. Добавить ещё раз?`;
+          `Пункт с названием "${name}" или адресом "${address}" уже существует. Добавить ещё раз?`;
         
         document.getElementById('confirm-add-btn').onclick = () => {
-          doAddPoint(address);
+          doAddPoint(name, address);
           closePopup('confirm-duplicate-popup');
         };
         
@@ -1160,13 +1157,13 @@
         return;
       }
       
-      doAddPoint(address);
+      doAddPoint(name, address);
     }
     
-    function doAddPoint(address) {
+    function doAddPoint(name, address) {
       const newPoint = {
         id: points.length > 0 ? Math.max(...points.map(p => p.id)) + 1 : 1,
-        name: address,
+        name: name,
         address: address
       };
       
@@ -1556,7 +1553,8 @@
         html += `
           <div class="point-item">
             <div class="point-info" onclick="selectPointForEditing(${point.id})">
-              <div class="point-name">${point.address}</div>
+              <div class="point-name">${point.name}</div>
+              <div class="point-address">${point.address}</div>
             </div>
             <div class="point-actions">
               <button class="action-btn edit" title="Редактировать" onclick="showEditPointPopup(${point.id})">✏️</button>
@@ -1587,7 +1585,8 @@
         html += `
           <div class="point-item">
             <div class="point-info" onclick="selectPointForEditing(${point.id})">
-              <div class="point-name">${point.address}</div>
+              <div class="point-name">${point.name}</div>
+              <div class="point-address">${point.address}</div>
             </div>
           </div>
         `;
@@ -1653,24 +1652,22 @@
       }, 3000);
     }
     
-    // ===== ФУНКЦИИ ЭКСПОРТА (ИСПРАВЛЕНО: КОРРЕКТНАЯ КОДИРОВКА И ФОРМАТИРОВАНИЕ) =====
+    // ===== ФУНКЦИИ ЭКСПОРТА (ИСПРАВЛЕНО: КОРРЕКТНАЯ КОДИРОВКА) =====
     function exportToExcel() {
-      // Добавляем строку с разделителем для Excel (обязательно в первой строке!)
-      let csvContent = 'sep=,\r\n';
+      // Формируем содержимое с правильной структурой для Excel
+      let csvContent = '\ufeff'; // BOM для корректной кодировки в Excel
       
-      // Заголовки с экранированием кавычек
+      // Заголовки
       const headers = ['Дата', 'Пункт выдачи', 'Адрес', 'Сотрудник', 'Телефон', 'Ставка'];
       csvContent += headers.map(cell => `"${cell.replace(/"/g, '""')}"`).join(',') + '\r\n';
       
-      // Данные с экранированием
+      // Данные
       const sortedSchedule = [...schedule].sort((a, b) => a.date.localeCompare(b.date));
-      
       sortedSchedule.forEach(entry => {
         const point = points.find(p => p.id === entry.pointId);
         const employee = employees.find(e => e.id === entry.employeeId);
         
         if (point && employee) {
-          // Экранируем кавычки в данных и оборачиваем в кавычки
           const row = [
             entry.date,
             point.name.replace(/"/g, '""'),
@@ -1683,8 +1680,8 @@
         }
       });
       
-      // Создаём Blob с правильной кодировкой UTF-8 с BOM
-      const blob = new Blob(['\ufeff' + csvContent], { 
+      // Создаём Blob с правильной кодировкой
+      const blob = new Blob([csvContent], { 
         type: 'text/csv;charset=utf-8;'
       });
       
@@ -1829,8 +1826,8 @@
     }
     
     function exportReportToExcel() {
-      // Добавляем строку с разделителем для Excel
-      let csvContent = 'sep=,\r\n';
+      // Формируем содержимое с правильной структурой для Excel
+      let csvContent = '\ufeff'; // BOM для корректной кодировки в Excel
       
       // Заголовки
       const headers = ['ФИО сотрудника', 'Пункт', 'Кол-во смен', 'Ставка', 'Итого'];
@@ -1859,8 +1856,8 @@
       );
       csvContent += totalData.map(cell => `"${cell}"`).join(',') + '\r\n';
       
-      // Создаём Blob с правильной кодировкой UTF-8 с BOM
-      const blob = new Blob(['\ufeff' + csvContent], { 
+      // Создаём Blob с правильной кодировкой
+      const blob = new Blob([csvContent], { 
         type: 'text/csv;charset=utf-8;'
       });
       
