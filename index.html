@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>График ПВЗ</title>
+  <title>Админ Панель ПВЗ</title>
   <style>
     * {
       margin: 0;
@@ -13,7 +13,7 @@
     
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: #1e3a8a; /* Темно-синий фон */
       min-height: 100vh;
       padding: 20px;
     }
@@ -32,37 +32,6 @@
       text-align: center;
     }
     
-    .header h1 {
-      color: #333;
-      margin-bottom: 15px;
-      font-size: 24px;
-    }
-    
-    .current-point-info {
-      background: linear-gradient(135deg, #667eea, #764ba2);
-      color: white;
-      padding: 15px;
-      border-radius: 12px;
-      margin-bottom: 20px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-      display: none;
-    }
-    
-    .current-point-info.active {
-      display: block;
-    }
-    
-    .current-point-info h2 {
-      margin: 0 0 8px 0;
-      font-size: 18px;
-    }
-    
-    .current-point-info p {
-      margin: 0;
-      font-size: 14px;
-      opacity: 0.9;
-    }
-    
     .stats {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -71,7 +40,7 @@
     }
     
     .stat-item {
-      background: #f8f9fa;
+      background: #f0f4ff;
       padding: 10px;
       border-radius: 8px;
       text-align: center;
@@ -80,7 +49,7 @@
     .stat-number {
       font-size: 24px;
       font-weight: bold;
-      color: #667eea;
+      color: #1e3a8a;
     }
     
     .stat-label {
@@ -117,28 +86,47 @@
     }
     
     .btn-primary {
-      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      background: #2563eb; /* Синий */
     }
     
     .btn-secondary {
-      background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+      background: #3b82f6; /* Голубой */
     }
     
     .btn-success {
-      background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+      background: #10b981; /* Зелёный */
     }
     
     .btn-warning {
-      background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+      background: #f59e0b; /* Оранжевый */
     }
     
     .btn-danger {
-      background: linear-gradient(135deg, #ff416c, #ff4b2b);
+      background: #ef4444; /* Красный */
     }
     
     .btn-back {
-      background: linear-gradient(135deg, #a8edea, #fed6e3);
-      color: #333;
+      background: #9ca3af;
+      color: #1f2937;
+    }
+    
+    .calendar-container {
+      background: white;
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+      margin-bottom: 20px;
+    }
+    
+    .point-address-header {
+      background: #1e3a8a;
+      color: white;
+      padding: 12px 15px;
+      border-radius: 10px;
+      margin-bottom: 15px;
+      text-align: center;
+      font-weight: bold;
+      font-size: 16px;
     }
     
     .calendar {
@@ -160,12 +148,18 @@
     }
     
     .month-nav {
-      background: none;
+      background: #2563eb;
       border: none;
       font-size: 20px;
       cursor: pointer;
-      color: #667eea;
-      padding: 5px 10px;
+      color: white;
+      padding: 8px 15px;
+      border-radius: 8px;
+      transition: background 0.2s;
+    }
+    
+    .month-nav:hover {
+      background: #1d4ed8;
     }
     
     .weekdays {
@@ -173,7 +167,7 @@
       grid-template-columns: repeat(7, 1fr);
       text-align: center;
       font-weight: bold;
-      color: #888;
+      color: #666;
       margin-bottom: 10px;
       font-size: 14px;
     }
@@ -209,44 +203,27 @@
     }
     
     .day.free {
-      background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
+      background: #ef4444; /* Красный — свободно */
       color: white;
-    }
-    
-    .day.free::after {
-      content: '';
-      position: absolute;
-      bottom: 4px;
-      right: 4px;
-      width: 6px;
-      height: 6px;
-      background: rgba(255,255,255,0.5);
-      border-radius: 50%;
     }
     
     .day.busy {
-      background: linear-gradient(135deg, #4caf50, #43a047);
+      background: #10b981; /* Зелёный — занято */
       color: white;
     }
     
-    .day.busy::after {
-      content: '';
-      position: absolute;
-      bottom: 4px;
-      right: 4px;
-      width: 6px;
-      height: 6px;
-      background: rgba(255,255,255,0.8);
-      border-radius: 50%;
-    }
-    
     .day.today {
-      border: 3px solid #667eea;
-      background: linear-gradient(135deg, #667eea, #764ba2) !important;
+      border: 3px solid #000000; /* Чёрная обводка для сегодня */
+      background: #f9fafb !important;
+      color: #333;
     }
     
-    .day.today::after {
-      display: none;
+    .day.today.free {
+      background: #fecaca !important;
+    }
+    
+    .day.today.busy {
+      background: #dcfce7 !important;
     }
     
     .day-number {
@@ -341,7 +318,7 @@
     
     .form-group input:focus {
       outline: none;
-      border-color: #667eea;
+      border-color: #2563eb;
     }
     
     .form-actions {
@@ -412,12 +389,12 @@
     }
     
     .action-btn.delete {
-      background: #ff6b6b;
+      background: #ef4444;
       color: white;
     }
     
     .action-btn.calendar {
-      background: #43e97b;
+      background: #10b981;
       color: white;
     }
     
@@ -441,17 +418,17 @@
     }
     
     .toast.success {
-      background: linear-gradient(135deg, #43e97b, #38f9d7);
+      background: #10b981;
       color: white;
     }
     
     .toast.error {
-      background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
+      background: #ef4444;
       color: white;
     }
     
     .toast.warning {
-      background: linear-gradient(135deg, #ffa726, #ff9800);
+      background: #f59e0b;
       color: white;
     }
     
@@ -486,12 +463,68 @@
     .empty-state p {
       margin-bottom: 20px;
     }
+    
+    .tag-selector {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    
+    .tag-btn {
+      padding: 8px 12px;
+      border: 2px solid #2563eb;
+      background: white;
+      color: #2563eb;
+      border-radius: 20px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .tag-btn.selected {
+      background: #2563eb;
+      color: white;
+    }
+    
+    .tag-btn:hover {
+      background: #3b82f6;
+      color: white;
+    }
+    
+    .recommended-badge {
+      background: #f59e0b;
+      color: white;
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-size: 12px;
+      margin-left: 8px;
+    }
+    
+    .no-calendar {
+      background: white;
+      border-radius: 16px;
+      padding: 40px 20px;
+      text-align: center;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    }
+    
+    .no-calendar p {
+      color: #666;
+      font-size: 16px;
+      margin-top: 10px;
+    }
+    
+    .no-calendar-icon {
+      font-size: 64px;
+      margin-bottom: 15px;
+      color: #9ca3af;
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="header">
-      <h1>🏢 График ПВЗ</h1>
       <div class="stats">
         <div class="stat-item">
           <div class="stat-number" id="points-count">0</div>
@@ -504,44 +537,52 @@
       </div>
     </div>
     
-    <!-- Информация о выбранном пункте -->
-    <div class="current-point-info" id="current-point-info">
-      <h2 id="current-point-name">ПВЗ Центральный</h2>
-      <p id="current-point-address">ул. Ленина, 10</p>
-    </div>
-    
     <div class="action-buttons">
       <button class="btn btn-primary" onclick="showAddPointPopup()">
-        <span>➕</span> ПВЗ
+        Добавить пункт выдачи
       </button>
       <button class="btn btn-secondary" onclick="showAddEmployeePopup()">
-        <span>👤</span> Сотрудник
+        Сотрудник
       </button>
       <button class="btn btn-success" onclick="showPointsList()">
-        <span>📍</span> Мои ПВЗ
+        Мои ПВЗ
       </button>
       <button class="btn btn-warning" onclick="showEmployeesList()">
-        <span>👥</span> Сотрудники
+        Сотрудники
       </button>
     </div>
     
-    <div class="calendar">
-      <div class="month-header">
-        <button class="month-nav" onclick="changeMonth(-1)">❮</button>
-        <div id="month-name">Январь 2026</div>
-        <button class="month-nav" onclick="changeMonth(1)">❯</button>
+    <div class="calendar-container">
+      <div id="calendar-placeholder" class="no-calendar">
+        <div class="no-calendar-icon">📅</div>
+        <h3>Календарь недоступен</h3>
+        <p>Выберите ПВЗ для просмотра графика</p>
       </div>
-      <div class="weekdays">
-        <div>Пн</div>
-        <div>Вт</div>
-        <div>Ср</div>
-        <div>Чт</div>
-        <div>Пт</div>
-        <div>Сб</div>
-        <div>Вс</div>
-      </div>
-      <div class="days" id="days-container">
-        <!-- Дни будут генерироваться скриптом -->
+      
+      <div id="calendar-content" style="display: none;">
+        <div class="point-address-header" id="point-address-header">
+          Адрес пункта будет здесь
+        </div>
+        
+        <div class="calendar">
+          <div class="month-header">
+            <button class="month-nav" onclick="changeMonth(-1)">❮</button>
+            <div id="month-name">Январь 2026</div>
+            <button class="month-nav" onclick="changeMonth(1)">❯</button>
+          </div>
+          <div class="weekdays">
+            <div>Пн</div>
+            <div>Вт</div>
+            <div>Ср</div>
+            <div>Чт</div>
+            <div>Пт</div>
+            <div>Сб</div>
+            <div>Вс</div>
+          </div>
+          <div class="days" id="days-container">
+            <!-- Дни будут генерироваться скриптом -->
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -550,7 +591,7 @@
   <div class="popup" id="add-point-popup">
     <div class="popup-content">
       <div class="popup-header">
-        <h3>➕ Добавить пункт выдачи</h3>
+        <h3>Добавить пункт выдачи</h3>
         <button class="popup-close" onclick="closePopup('add-point-popup')">×</button>
       </div>
       <div class="form-group">
@@ -558,11 +599,11 @@
         <input type="text" id="point-name" placeholder="Например: ПВЗ Центральный" maxlength="100">
       </div>
       <div class="form-group">
-        <label for="point-address">Адрес *</label>
+        <label for="point-address">Адрес ПВЗ *</label>
         <input type="text" id="point-address" placeholder="ул. Ленина, 10">
       </div>
       <div class="form-actions">
-        <button class="btn btn-secondary" onclick="closePopup('add-point-popup')">Отмена</button>
+        <button class="btn btn-back" onclick="closePopup('add-point-popup')">Отмена</button>
         <button class="btn btn-primary" onclick="addPoint()">Добавить</button>
       </div>
     </div>
@@ -572,7 +613,7 @@
   <div class="popup" id="add-employee-popup">
     <div class="popup-content">
       <div class="popup-header">
-        <h3>👤 Добавить сотрудника</h3>
+        <h3>Добавить сотрудника</h3>
         <button class="popup-close" onclick="closePopup('add-employee-popup')">×</button>
       </div>
       <div class="form-group">
@@ -587,9 +628,15 @@
         <label for="employee-rate">Ставка за день (₽)</label>
         <input type="number" id="employee-rate" placeholder="1000" value="1000" min="0">
       </div>
+      <div class="form-group">
+        <label>Теги по пунктам (рекомендации)</label>
+        <div class="tag-selector" id="point-tags-selector">
+          <!-- Теги будут генерироваться -->
+        </div>
+      </div>
       <div class="form-actions">
-        <button class="btn btn-secondary" onclick="closePopup('add-employee-popup')">Отмена</button>
-        <button class="btn btn-primary" onclick="addEmployee()">Добавить</button>
+        <button class="btn btn-back" onclick="closePopup('add-employee-popup')">Отмена</button>
+        <button class="btn btn-secondary" onclick="addEmployee()">Добавить</button>
       </div>
     </div>
   </div>
@@ -598,7 +645,7 @@
   <div class="popup" id="points-list-popup">
     <div class="popup-content">
       <div class="popup-header">
-        <h3>📍 Мои пункты выдачи</h3>
+        <h3>Мои пункты выдачи</h3>
         <button class="popup-close" onclick="closePopup('points-list-popup')">×</button>
       </div>
       <div class="points-list" id="points-list">
@@ -611,7 +658,7 @@
   <div class="popup" id="employees-list-popup">
     <div class="popup-content">
       <div class="popup-header">
-        <h3>👥 Мои сотрудники</h3>
+        <h3>Мои сотрудники</h3>
         <button class="popup-close" onclick="closePopup('employees-list-popup')">×</button>
       </div>
       <div class="employees-list" id="employees-list">
@@ -624,13 +671,13 @@
   <div class="popup" id="confirm-delete-popup">
     <div class="popup-content">
       <div class="popup-header">
-        <h3>⚠️ Подтверждение</h3>
+        <h3>Подтверждение</h3>
         <button class="popup-close" onclick="closePopup('confirm-delete-popup')">×</button>
       </div>
       <div class="confirm-popup">
         <p id="confirm-delete-message">Вы уверены, что хотите удалить этот пункт?</p>
         <div class="confirm-actions">
-          <button class="btn btn-secondary" onclick="closePopup('confirm-delete-popup')">Отмена</button>
+          <button class="btn btn-back" onclick="closePopup('confirm-delete-popup')">Отмена</button>
           <button class="btn btn-danger" id="confirm-delete-btn">Удалить</button>
         </div>
       </div>
@@ -641,13 +688,13 @@
   <div class="popup" id="confirm-duplicate-popup">
     <div class="popup-content">
       <div class="popup-header">
-        <h3>⚠️ Внимание</h3>
+        <h3>Внимание</h3>
         <button class="popup-close" onclick="closePopup('confirm-duplicate-popup')">×</button>
       </div>
       <div class="confirm-popup">
         <p id="confirm-duplicate-message">Такой пункт уже существует. Добавить ещё раз?</p>
         <div class="confirm-actions">
-          <button class="btn btn-secondary" onclick="closePopup('confirm-duplicate-popup')">Отмена</button>
+          <button class="btn btn-back" onclick="closePopup('confirm-duplicate-popup')">Отмена</button>
           <button class="btn btn-primary" id="confirm-add-btn">Добавить</button>
         </div>
       </div>
@@ -664,13 +711,13 @@
       <div style="text-align: center; padding: 20px;">
         <div style="font-size: 48px; margin-bottom: 10px;">📅</div>
         <p style="color: #666; margin-bottom: 20px;">
-          Выберите сотрудника для работы в этот день
+          Выберите сотрудника для работы
         </p>
         <div id="day-employees-list">
           <!-- Список сотрудников для выбора -->
         </div>
         <div id="day-assigned-employee" style="display: none; margin-top: 20px;">
-          <p style="color: #4caf50; font-weight: bold; margin-bottom: 10px;">✅ Назначен:</p>
+          <p style="color: #10b981; font-weight: bold; margin-bottom: 10px;">✅ Назначен:</p>
           <div id="assigned-employee-name" style="font-size: 18px; margin-bottom: 15px;"></div>
           <button class="btn btn-danger" onclick="clearDayAssignment()">Очистить день</button>
         </div>
@@ -689,11 +736,12 @@
     let points = JSON.parse(localStorage.getItem('pvz_points')) || [];
     let employees = JSON.parse(localStorage.getItem('pvz_employees')) || [];
     let schedule = JSON.parse(localStorage.getItem('pvz_schedule')) || []; // { pointId, employeeId, date }
+    let employeeTags = JSON.parse(localStorage.getItem('pvz_employee_tags')) || {}; // { employeeId: [pointId1, pointId2] }
     
     // ===== ИНИЦИАЛИЗАЦИЯ =====
     document.addEventListener('DOMContentLoaded', () => {
       updateStats();
-      generateCalendar(currentYear, currentMonth);
+      updateCalendarView();
     });
     
     // ===== КАЛЕНДАРЬ =====
@@ -748,9 +796,6 @@
         // Клик работает только если выбран ПВЗ
         if (currentPointId) {
           dayEl.onclick = () => showDayPopup(day, month, year);
-        } else {
-          dayEl.style.cursor = 'not-allowed';
-          dayEl.title = 'Выберите пункт выдачи для редактирования';
         }
         
         daysContainer.appendChild(dayEl);
@@ -792,7 +837,28 @@
       document.getElementById('employee-name').value = '';
       document.getElementById('employee-phone').value = '';
       document.getElementById('employee-rate').value = '1000';
+      
+      // Генерируем теги для пунктов
+      const tagsContainer = document.getElementById('point-tags-selector');
+      if (points.length === 0) {
+        tagsContainer.innerHTML = '<p style="color: #999;">Сначала добавьте пункты выдачи</p>';
+      } else {
+        let html = '';
+        points.forEach(point => {
+          html += `
+            <button class="tag-btn" onclick="toggleTag(this, ${point.id})">
+              ${point.name}
+            </button>
+          `;
+        });
+        tagsContainer.innerHTML = html;
+      }
+      
       showPopup('add-employee-popup');
+    }
+    
+    function toggleTag(btn, pointId) {
+      btn.classList.toggle('selected');
     }
     
     function showPointsList() {
@@ -829,13 +895,24 @@
         if (employees.length === 0) {
           listEl.innerHTML = '<p style="color: #999;">Сначала добавьте сотрудников</p>';
         } else {
+          // Сортируем сотрудников: сначала рекомендованные для этого ПВЗ
+          const sortedEmployees = [...employees].sort((a, b) => {
+            const aHasTag = employeeTags[a.id] && employeeTags[a.id].includes(currentPointId);
+            const bHasTag = employeeTags[b.id] && employeeTags[b.id].includes(currentPointId);
+            return bHasTag - aHasTag; // Рекомендованные вверху
+          });
+          
           let html = '';
-          employees.forEach(emp => {
+          sortedEmployees.forEach(emp => {
+            const isRecommended = employeeTags[emp.id] && employeeTags[emp.id].includes(currentPointId);
             html += `
               <div class="employee-item" onclick="assignEmployeeToDay(${emp.id}, '${dateStr}')">
                 <div class="employee-info">
-                  <div class="employee-name">${emp.name}</div>
-                  <div class="employee-details">${emp.phone || ''}</div>
+                  <div class="employee-name">
+                    ${emp.name}
+                    ${isRecommended ? '<span class="recommended-badge">★ Рекомендован</span>' : ''}
+                  </div>
+                  <div class="employee-details">${emp.phone || ''} • ${emp.rate}₽/день</div>
                 </div>
                 <div style="font-size: 24px;">➡️</div>
               </div>
@@ -859,7 +936,7 @@
       }
       
       if (!address || address.length < 5) {
-        showToast('Адрес должен быть не менее 5 символов', 'error');
+        showToast('Адрес ПВЗ должен быть не менее 5 символов', 'error');
         return;
       }
       
@@ -899,6 +976,7 @@
       showToast('✅ ПВЗ добавлен!', 'success');
       updateStats();
       renderPointsList();
+      updateCalendarView();
     }
     
     // ===== ДОБАВЛЕНИЕ СОТРУДНИКА =====
@@ -940,7 +1018,16 @@
       };
       
       employees.push(newEmployee);
+      
+      // Сохраняем теги
+      const selectedTags = Array.from(document.querySelectorAll('#point-tags-selector .tag-btn.selected'));
+      const tags = selectedTags.map(btn => parseInt(btn.getAttribute('onclick').match(/\d+/)[0]));
+      if (tags.length > 0) {
+        employeeTags[newEmployee.id] = tags;
+      }
+      
       localStorage.setItem('pvz_employees', JSON.stringify(employees));
+      localStorage.setItem('pvz_employee_tags', JSON.stringify(employeeTags));
       
       closePopup('add-employee-popup');
       showToast('✅ Сотрудник добавлен!', 'success');
@@ -969,14 +1056,22 @@
       // Удаляем все записи из графика для этого ПВЗ
       schedule = schedule.filter(s => s.pointId !== pointId);
       
+      // Удаляем теги для этого ПВЗ у всех сотрудников
+      for (let empId in employeeTags) {
+        employeeTags[empId] = employeeTags[empId].filter(pid => pid !== pointId);
+        if (employeeTags[empId].length === 0) {
+          delete employeeTags[empId];
+        }
+      }
+      
       localStorage.setItem('pvz_points', JSON.stringify(points));
       localStorage.setItem('pvz_schedule', JSON.stringify(schedule));
+      localStorage.setItem('pvz_employee_tags', JSON.stringify(employeeTags));
       
       // Если удаляем текущий ПВЗ, сбрасываем выбор
       if (currentPointId === pointId) {
         currentPointId = null;
-        document.getElementById('current-point-info').classList.remove('active');
-        generateCalendar(currentYear, currentMonth);
+        updateCalendarView();
       }
       
       showToast('✅ ПВЗ удалён!', 'success');
@@ -1005,8 +1100,12 @@
       // Удаляем все записи из графика для этого сотрудника
       schedule = schedule.filter(s => s.employeeId !== employeeId);
       
+      // Удаляем теги
+      delete employeeTags[employeeId];
+      
       localStorage.setItem('pvz_employees', JSON.stringify(employees));
       localStorage.setItem('pvz_schedule', JSON.stringify(schedule));
+      localStorage.setItem('pvz_employee_tags', JSON.stringify(employeeTags));
       
       showToast('✅ Сотрудник удалён!', 'success');
       updateStats();
@@ -1059,14 +1158,31 @@
       const point = points.find(p => p.id === pointId);
       currentPointId = pointId;
       
-      // Показываем информацию о выбранном ПВЗ
-      document.getElementById('current-point-name').textContent = point.name;
-      document.getElementById('current-point-address').textContent = point.address;
-      document.getElementById('current-point-info').classList.add('active');
-      
+      updateCalendarView();
       closePopup('points-list-popup');
       showToast(`✅ Выбран: ${point.name}`, 'success');
-      generateCalendar(currentYear, currentMonth);
+    }
+    
+    // ===== ОБНОВЛЕНИЕ ВИДА КАЛЕНДАРЯ =====
+    function updateCalendarView() {
+      const placeholder = document.getElementById('calendar-placeholder');
+      const content = document.getElementById('calendar-content');
+      const addressHeader = document.getElementById('point-address-header');
+      
+      if (!currentPointId) {
+        // Календарь недоступен
+        placeholder.style.display = 'block';
+        content.style.display = 'none';
+      } else {
+        // Показываем календарь
+        const point = points.find(p => p.id === currentPointId);
+        addressHeader.textContent = point.address;
+        
+        placeholder.style.display = 'none';
+        content.style.display = 'block';
+        
+        generateCalendar(currentYear, currentMonth);
+      }
     }
     
     // ===== ОТОБРАЖЕНИЕ СПИСКОВ =====
@@ -1078,7 +1194,6 @@
           <div class="empty-state">
             <h4>📭 Пусто</h4>
             <p>Пока нет пунктов выдачи</p>
-            <button class="btn btn-primary" onclick="showAddPointPopup()">➕ Добавить ПВЗ</button>
           </div>
         `;
         return;
@@ -1111,7 +1226,6 @@
           <div class="empty-state">
             <h4>📭 Пусто</h4>
             <p>Пока нет сотрудников</p>
-            <button class="btn btn-secondary" onclick="showAddEmployeePopup()">👤 Добавить сотрудника</button>
           </div>
         `;
         return;
@@ -1119,11 +1233,20 @@
       
       let html = '';
       employees.forEach(emp => {
+        const empTags = employeeTags[emp.id] || [];
+        const tagsHtml = empTags.map(pid => {
+          const p = points.find(p => p.id === pid);
+          return p ? `<span style="background: #2563eb; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px; margin-right: 4px;">${p.name}</span>` : '';
+        }).join('');
+        
         html += `
           <div class="employee-item">
             <div class="employee-info">
               <div class="employee-name">${emp.name}</div>
               <div class="employee-details">${emp.phone || ''} • ${emp.rate}₽/день</div>
+              <div style="margin-top: 6px; font-size: 12px;">
+                ${tagsHtml || '<span style="color: #999;">Нет тегов</span>'}
+              </div>
             </div>
             <div class="employee-actions">
               <button class="action-btn delete" title="Удалить" onclick="confirmDeleteEmployee(${emp.id})">🗑️</button>
@@ -1150,6 +1273,51 @@
       setTimeout(() => {
         toast.classList.remove('show');
       }, 3000);
+    }
+    
+    // ===== ЭКСПОРТ В EXCEL =====
+    function exportToExcel() {
+      // Создаём данные для экспорта
+      const data = [];
+      
+      // Заголовки
+      data.push(['Дата', 'Пункт выдачи', 'Адрес', 'Сотрудник', 'Телефон', 'Ставка']);
+      
+      // Сортируем график по дате
+      const sortedSchedule = [...schedule].sort((a, b) => a.date.localeCompare(b.date));
+      
+      // Заполняем данные
+      sortedSchedule.forEach(entry => {
+        const point = points.find(p => p.id === entry.pointId);
+        const employee = employees.find(e => e.id === entry.employeeId);
+        
+        if (point && employee) {
+          data.push([
+            entry.date,
+            point.name,
+            point.address,
+            employee.name,
+            employee.phone || '',
+            employee.rate
+          ]);
+        }
+      });
+      
+      // Создаём CSV
+      const csvContent = data.map(row => row.join(',')).join('\n');
+      
+      // Создаём ссылку для скачивания
+      const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', `grafik_pvz_${new Date().toISOString().split('T')[0]}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      showToast('✅ Данные экспортированы в CSV!', 'success');
     }
   </script>
 </body>
