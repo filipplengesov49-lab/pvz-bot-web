@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Админ Панель ПВЗ</title>
   <style>
+    /* ===== БАЗОВЫЕ СТИЛИ ===== */
     * {
       margin: 0;
       padding: 0;
@@ -25,6 +26,7 @@
       margin: 0 auto;
     }
     
+    /* ===== ХЕДЕР И СТАТИСТИКА ===== */
     .header {
       background: white;
       border-radius: 12px;
@@ -60,6 +62,7 @@
       margin-top: 4px;
     }
     
+    /* ===== КНОПКИ ДЕЙСТВИЙ ===== */
     .action-buttons {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -93,34 +96,15 @@
       transform: translateY(0);
     }
     
-    .btn-primary {
-      background: #1e40af;
-    }
+    .btn-primary { background: #1e40af; }
+    .btn-secondary { background: #7B99EC; }
+    .btn-success { background: #1e40af; }
+    .btn-warning { background: #7B99EC; }
+    .btn-danger { background: #b91c1c; }
+    .btn-back { background: #94a3b8; }
+    .btn-edit { background: #f59e0b; }
     
-    .btn-secondary {
-      background: #7B99EC;
-    }
-    
-    .btn-success {
-      background: #1e40af;
-    }
-    
-    .btn-warning {
-      background: #7B99EC;
-    }
-    
-    .btn-danger {
-      background: #b91c1c;
-    }
-    
-    .btn-back {
-      background: #94a3b8;
-    }
-    
-    .btn-edit {
-      background: #f59e0b;
-    }
-    
+    /* ===== КАЛЕНДАРЬ ===== */
     .calendar-container {
       background: white;
       border-radius: 12px;
@@ -271,6 +255,7 @@
       z-index: 1;
     }
     
+    /* ===== ПОП-АП ОКНА ===== */
     .popup {
       position: fixed;
       top: 0; left: 0;
@@ -336,6 +321,7 @@
       color: #1e293b;
     }
     
+    /* ===== ФОРМЫ ===== */
     .form-group {
       margin-bottom: 18px;
     }
@@ -373,6 +359,7 @@
       margin-top: 15px;
     }
     
+    /* ===== СПИСКИ ПУНКТОВ И СОТРУДНИКОВ ===== */
     .points-list, .employees-list {
       display: flex;
       flex-direction: column;
@@ -446,6 +433,7 @@
       color: #b45309;
     }
     
+    /* ===== УВЕДОМЛЕНИЯ ===== */
     .toast {
       position: fixed;
       bottom: 20px;
@@ -466,18 +454,11 @@
       transform: translateX(-50%) translateY(0);
     }
     
-    .toast.success {
-      border-left-color: #22c55e;
-    }
+    .toast.success { border-left-color: #22c55e; }
+    .toast.error { border-left-color: #ef4444; }
+    .toast.warning { border-left-color: #f59e0b; }
     
-    .toast.error {
-      border-left-color: #ef4444;
-    }
-    
-    .toast.warning {
-      border-left-color: #f59e0b;
-    }
-    
+    /* ===== ПОДТВЕРЖДЕНИЯ ===== */
     .confirm-popup {
       text-align: center;
       padding: 20px 0;
@@ -495,6 +476,7 @@
       gap: 10px;
     }
     
+    /* ===== ПУСТЫЕ СОСТОЯНИЯ ===== */
     .empty-state {
       text-align: center;
       color: #94a3b8;
@@ -511,6 +493,7 @@
       font-size: 14px;
     }
     
+    /* ===== ТЕГИ СОТРУДНИКОВ ===== */
     .tag-selector {
       display: flex;
       flex-wrap: wrap;
@@ -550,6 +533,7 @@
       font-weight: 500;
     }
     
+    /* ===== КАЛЕНДАРЬ НЕДОСТУПЕН ===== */
     .no-calendar {
       background: white;
       border-radius: 12px;
@@ -570,6 +554,7 @@
       color: #94a3b8;
     }
     
+    /* ===== СЕКЦИЯ ОТЧЁТА ===== */
     .report-section {
       background: white;
       border-radius: 12px;
@@ -586,6 +571,7 @@
       background: #1e40af;
     }
     
+    /* ===== СЕКЦИЯ ЭКСПОРТА ===== */
     .export-section {
       background: white;
       border-radius: 12px;
@@ -602,13 +588,20 @@
       background: #031D5B;
     }
     
+    /* ===== ТАБЛИЦА ОТЧЁТА (УЛУЧШЕННАЯ) ===== */
+    .report-table-container {
+      max-height: 400px;
+      overflow-y: auto;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      margin-top: 15px;
+      background: white;
+    }
+    
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 15px;
       background: white;
-      border-radius: 8px;
-      overflow: hidden;
     }
     
     th, td {
@@ -616,12 +609,25 @@
       padding: 10px 12px;
       text-align: left;
       font-size: 14px;
+      vertical-align: top; /* Выравнивание по верху для многострочного текста */
+      word-wrap: break-word; /* Перенос длинных слов */
+      min-width: 80px; /* Минимальная ширина колонки */
     }
     
     th {
       background: #dbeafe;
       font-weight: 600;
       color: #1e40af;
+      white-space: nowrap; /* Заголовки в одну строку */
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    
+    /* Выравнивание числовых колонок по правому краю */
+    th:nth-child(3), th:nth-child(4), th:nth-child(5),
+    td:nth-child(3), td:nth-child(4), td:nth-child(5) {
+      text-align: right;
     }
     
     tr:nth-child(even) {
@@ -638,10 +644,16 @@
       color: #1e40af !important;
     }
     
-    .report-total td:first-child {
-      text-align: right;
+    .report-total td {
+      vertical-align: middle !important;
     }
     
+    /* Ячейка "ВСЕГО:" выравнивается по правому краю */
+    .report-total td:nth-child(3) {
+      text-align: right !important;
+    }
+    
+    /* ===== ВЫБОР ДАТЫ ===== */
     .date-picker {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -912,7 +924,7 @@
       
       <div id="report-result" style="margin-top: 25px; display: none;">
         <h4 style="margin-bottom: 15px; color: #1e40af;">Результаты отчёта</h4>
-        <div style="max-height: 400px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px;">
+        <div class="report-table-container">
           <table id="report-table">
             <thead>
               <tr>
@@ -1635,9 +1647,14 @@
     
     // ===== ФУНКЦИИ ЭКСПОРТА =====
     function exportToExcel() {
-      const data = [];
-      data.push(['Дата', 'Пункт выдачи', 'Адрес', 'Сотрудник', 'Телефон', 'Ставка']);
+      // Добавляем строку с разделителем для Excel
+      let csvContent = 'sep=,\r\n';
       
+      // Заголовки
+      const headers = ['Дата', 'Пункт выдачи', 'Адрес', 'Сотрудник', 'Телефон', 'Ставка'];
+      csvContent += headers.map(cell => `"${cell.replace(/"/g, '""')}"`).join(',') + '\r\n';
+      
+      // Данные
       const sortedSchedule = [...schedule].sort((a, b) => a.date.localeCompare(b.date));
       
       sortedSchedule.forEach(entry => {
@@ -1645,19 +1662,19 @@
         const employee = employees.find(e => e.id === entry.employeeId);
         
         if (point && employee) {
-          data.push([
+          const row = [
             entry.date,
-            point.name,
-            point.address,
-            employee.name,
-            employee.phone || '',
+            point.name.replace(/"/g, '""'),
+            point.address.replace(/"/g, '""'),
+            employee.name.replace(/"/g, '""'),
+            (employee.phone || '').replace(/"/g, '""'),
             employee.rate
-          ]);
+          ];
+          csvContent += row.map(cell => `"${cell}"`).join(',') + '\r\n';
         }
       });
       
-      const csvContent = data.map(row => row.join(',')).join('\r\n');
-      
+      // Создаём Blob и скачиваем
       const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -1774,12 +1791,17 @@
         const row = document.createElement('tr');
         const total = item.count * item.rate;
         
+        // Форматируем числа для отображения
+        const formattedCount = item.count;
+        const formattedRate = `${item.rate} ₽`;
+        const formattedTotal = `${total.toFixed(2)} ₽`;
+        
         row.innerHTML = `
           <td>${item.employeeName}</td>
           <td>${item.pointName}</td>
-          <td>${item.count}</td>
-          <td>${item.rate} ₽</td>
-          <td>${total.toFixed(2)} ₽</td>
+          <td>${formattedCount}</td>
+          <td>${formattedRate}</td>
+          <td>${formattedTotal}</td>
         `;
         
         tableBody.appendChild(row);
@@ -1794,46 +1816,35 @@
     }
     
     function exportReportToExcel() {
-      const table = document.getElementById('report-table');
-      const headers = [];
-      const dataRows = [];
-      const totalRow = [];
+      // Добавляем строку с разделителем для Excel
+      let csvContent = 'sep=,\r\n';
       
       // Заголовки
-      table.querySelectorAll('thead th').forEach(th => {
-        headers.push(th.textContent.trim());
-      });
-      
-      // Данные
-      table.querySelectorAll('tbody tr').forEach(tr => {
-        const rowData = [];
-        tr.querySelectorAll('td').forEach(td => {
-          rowData.push(td.textContent.trim());
-        });
-        dataRows.push(rowData);
-      });
-      
-      // Итоги (5 ячеек)
-      table.querySelector('tfoot tr').querySelectorAll('td').forEach(td => {
-        totalRow.push(td.textContent.trim());
-      });
-      
-      // Формируем CSV с правильным разделителем строк \r\n
-      let csvContent = '';
-      
-      // Заголовки
+      const headers = ['ФИО сотрудника', 'Пункт', 'Кол-во смен', 'Ставка', 'Итого'];
       csvContent += headers.map(cell => `"${cell.replace(/"/g, '""')}"`).join(',') + '\r\n';
       
       // Данные
-      dataRows.forEach(row => {
-        csvContent += row.map(cell => `"${cell.replace(/"/g, '""')}"`).join(',') + '\r\n';
+      const table = document.getElementById('report-table');
+      const rows = table.querySelectorAll('tbody tr');
+      
+      rows.forEach(row => {
+        const cells = row.querySelectorAll('td');
+        const rowData = Array.from(cells).map(cell => 
+          cell.textContent.trim().replace(/"/g, '""')
+        );
+        csvContent += rowData.map(cell => `"${cell}"`).join(',') + '\r\n';
       });
       
       // Пустая строка
       csvContent += '\r\n';
       
       // Итоги
-      csvContent += totalRow.map(cell => `"${cell.replace(/"/g, '""')}"`).join(',') + '\r\n';
+      const totalRow = table.querySelector('tfoot tr');
+      const totalCells = totalRow.querySelectorAll('td');
+      const totalData = Array.from(totalCells).map(cell => 
+        cell.textContent.trim().replace(/"/g, '""')
+      );
+      csvContent += totalData.map(cell => `"${cell}"`).join(',') + '\r\n';
       
       // Создаём Blob и скачиваем
       const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
