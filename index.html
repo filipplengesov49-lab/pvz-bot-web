@@ -13,7 +13,7 @@
     }
     
     body {
-      background: #f0f9ff; /* Светло-голубой фон */
+      background: #f0f9ff;
       color: #1e293b;
       min-height: 100vh;
       padding: 20px;
@@ -81,7 +81,7 @@
       justify-content: center;
       gap: 8px;
       text-align: center;
-      min-height: 50px; /* Единая высота для всех кнопок */
+      min-height: 50px;
     }
     
     .btn:hover {
@@ -94,19 +94,19 @@
     }
     
     .btn-primary {
-      background: #1e40af; /* Тёмно-синий для ПВЗ */
+      background: #1e40af;
     }
     
     .btn-secondary {
-      background: #4E8BA2; /* Тёмно-зелёный для сотрудников */
+      background: #7B99EC;
     }
     
     .btn-success {
-      background: #1e40af; /* Тёмно-синий для ПВЗ */
+      background: #1e40af;
     }
     
     .btn-warning {
-      background: #092D8C; /* Тёмно-зелёный для сотрудников */
+      background: #7B99EC;
     }
     
     .btn-danger {
@@ -141,7 +141,7 @@
     .point-select-btn {
       width: 100%;
       padding: 12px 20px;
-      background: #1e40af;
+      background: #031D5B;
       color: white;
       border: none;
       border-radius: 8px;
@@ -156,19 +156,8 @@
     }
     
     .point-select-btn:hover {
-      background: #1d4ed8;
+      background: #052a7a;
       transform: translateY(-2px);
-    }
-    
-    .point-address-header {
-      background: #dbeafe;
-      color: #1e40af;
-      padding: 10px 15px;
-      border-radius: 8px;
-      margin-bottom: 15px;
-      text-align: center;
-      font-weight: 500;
-      font-size: 14px;
     }
     
     .calendar {
@@ -282,7 +271,6 @@
       z-index: 1;
     }
     
-    /* Поп-ап окна */
     .popup {
       position: fixed;
       top: 0; left: 0;
@@ -427,13 +415,13 @@
     .point-actions, .employee-actions {
       display: flex;
       gap: 8px;
-      min-width: 100px; /* Фиксированная ширина для выравнивания */
-      justify-content: flex-end; /* Выравниваем по правому краю */
+      min-width: 100px;
+      justify-content: flex-end;
     }
     
     .action-btn {
-      width: 36px !important; /* Важно: фиксированная ширина */
-      height: 36px !important; /* Важно: фиксированная высота */
+      width: 36px !important;
+      height: 36px !important;
       border-radius: 8px;
       border: none;
       cursor: pointer;
@@ -442,8 +430,8 @@
       justify-content: center;
       font-size: 16px !important;
       transition: all 0.2s;
-      padding: 0 !important; /* Убираем внутренние отступы */
-      line-height: 1 !important; /* Убираем лишние пробелы */
+      padding: 0 !important;
+      line-height: 1 !important;
     }
     
     .action-btn.delete {
@@ -593,6 +581,7 @@
       width: 100%;
       padding: 16px;
       font-size: 16px;
+      background: #031D5B;
     }
   </style>
 </head>
@@ -641,10 +630,6 @@
       </div>
       
       <div id="calendar-content" style="display: none;">
-        <div class="point-address-header" id="point-address-header">
-          Адрес пункта будет здесь
-        </div>
-        
         <div class="calendar">
           <div class="month-header">
             <button class="month-nav" onclick="changeMonth(-1)">❮</button>
@@ -820,13 +805,13 @@
     // ===== ХРАНИЛИЩЕ ДАННЫХ (localStorage) =====
     let currentYear = new Date().getFullYear();
     let currentMonth = new Date().getMonth();
-    let currentPointId = null; // ID выбранного пункта
+    let currentPointId = null;
     let points = JSON.parse(localStorage.getItem('pvz_points')) || [];
     let employees = JSON.parse(localStorage.getItem('pvz_employees')) || [];
-    let schedule = JSON.parse(localStorage.getItem('pvz_schedule')) || []; // { pointId, employeeId, date }
-    let employeeTags = JSON.parse(localStorage.getItem('pvz_employee_tags')) || {}; // { employeeId: [pointId1, pointId2] }
-    let editingPointId = null; // ID редактируемого пункта
-    let editingEmployeeId = null; // ID редактируемого сотрудника
+    let schedule = JSON.parse(localStorage.getItem('pvz_schedule')) || [];
+    let employeeTags = JSON.parse(localStorage.getItem('pvz_employee_tags')) || {};
+    let editingPointId = null;
+    let editingEmployeeId = null;
     
     // ===== ИНИЦИАЛИЗАЦИЯ =====
     document.addEventListener('DOMContentLoaded', () => {
@@ -836,15 +821,12 @@
     
     // ===== ВАЛИДАЦИЯ ТЕЛЕФОНА =====
     function validatePhone(input) {
-      // Оставляем только цифры и символы формата
       let value = input.value.replace(/[^+0-9() -]/g, '');
       
-      // Ограничиваем длину
       if (value.length > 20) {
         value = value.substring(0, 20);
       }
       
-      // Автоматическое форматирование
       if (value.startsWith('+7') && value.length === 3) {
         value += ' (';
       } else if (value.startsWith('+7 (') && value.length === 6) {
@@ -875,19 +857,17 @@
       const daysContainer = document.getElementById('days-container');
       daysContainer.innerHTML = '';
       
-      const firstDay = new Date(year, month, 1).getDay() || 7; // Пн = 1, Вс = 7
+      const firstDay = new Date(year, month, 1).getDay() || 7;
       const daysInMonth = new Date(year, month + 1, 0).getDate();
       const today = new Date();
       const isCurrentMonth = year === today.getFullYear() && month === today.getMonth();
       
-      // Пустые дни до начала месяца
       for (let i = 1; i < firstDay; i++) {
         const empty = document.createElement('div');
         empty.className = 'day empty';
         daysContainer.appendChild(empty);
       }
       
-      // Дни месяца
       for (let day = 1; day <= daysInMonth; day++) {
         const dayEl = document.createElement('div');
         dayEl.className = 'day';
@@ -899,19 +879,16 @@
         
         const dateStr = formatDate(year, month, day);
         
-        // Проверяем, есть ли запись в графике для текущего ПВЗ
         const isScheduled = currentPointId && schedule.some(s => 
           s.pointId === currentPointId && s.date === dateStr
         );
         
         dayEl.classList.add(isScheduled ? 'busy' : 'free');
         
-        // Сегодняшний день
         if (isCurrentMonth && day === today.getDate()) {
           dayEl.classList.add('today');
         }
         
-        // Клик работает только если выбран ПВЗ
         if (currentPointId) {
           dayEl.onclick = () => showDayPopup(day, month, year);
         }
@@ -966,7 +943,6 @@
       document.getElementById('point-save-btn').textContent = 'Сохранить';
       document.getElementById('point-save-btn').className = 'btn btn-edit';
       
-      // Закрываем окно списка перед открытием редактирования
       closePopup('points-list-popup');
       
       showPopup('add-point-popup');
@@ -987,7 +963,6 @@
       }
       
       if (editingPointId) {
-        // Редактирование существующего пункта
         const index = points.findIndex(p => p.id === editingPointId);
         if (index !== -1) {
           points[index].name = name;
@@ -999,7 +974,6 @@
           updateCalendarView();
         }
       } else {
-        // Добавление нового пункта
         addPoint();
       }
     }
@@ -1018,7 +992,6 @@
         return;
       }
       
-      // Проверка на дубликат
       const existingPoint = points.find(p => 
         p.name.toLowerCase() === name.toLowerCase() || 
         p.address.toLowerCase() === address.toLowerCase()
@@ -1066,7 +1039,6 @@
       document.getElementById('employee-save-btn').textContent = 'Добавить';
       document.getElementById('employee-save-btn').className = 'btn btn-secondary';
       
-      // Генерируем теги для пунктов
       const tagsContainer = document.getElementById('point-tags-selector');
       if (points.length === 0) {
         tagsContainer.innerHTML = '<p style="color: #94a3b8;">Сначала добавьте пункты выдачи</p>';
@@ -1097,7 +1069,6 @@
       document.getElementById('employee-save-btn').textContent = 'Сохранить';
       document.getElementById('employee-save-btn').className = 'btn btn-edit';
       
-      // Генерируем теги для пунктов
       const tagsContainer = document.getElementById('point-tags-selector');
       if (points.length === 0) {
         tagsContainer.innerHTML = '<p style="color: #94a3b8;">Сначала добавьте пункты выдачи</p>';
@@ -1114,7 +1085,6 @@
         tagsContainer.innerHTML = html;
       }
       
-      // Закрываем окно списка перед открытием редактирования
       closePopup('employees-list-popup');
       
       showPopup('add-employee-popup');
@@ -1131,14 +1101,12 @@
       }
       
       if (editingEmployeeId) {
-        // Редактирование существующего сотрудника
         const index = employees.findIndex(e => e.id === editingEmployeeId);
         if (index !== -1) {
           employees[index].name = name;
           employees[index].phone = phone;
           employees[index].rate = rate;
           
-          // Обновляем теги
           const selectedTags = Array.from(document.querySelectorAll('#point-tags-selector .tag-btn.selected'));
           const tags = selectedTags.map(btn => parseInt(btn.getAttribute('onclick').match(/\d+/)[0]));
           if (tags.length > 0) {
@@ -1155,7 +1123,6 @@
           renderEmployeesList();
         }
       } else {
-        // Добавление нового сотрудника
         addEmployee();
       }
     }
@@ -1170,7 +1137,6 @@
         return;
       }
       
-      // Проверка на дубликат по имени
       const existingEmployee = employees.find(e => e.name.toLowerCase() === name.toLowerCase());
       
       if (existingEmployee) {
@@ -1199,7 +1165,6 @@
       
       employees.push(newEmployee);
       
-      // Сохраняем теги
       const selectedTags = Array.from(document.querySelectorAll('#point-tags-selector .tag-btn.selected'));
       const tags = selectedTags.map(btn => parseInt(btn.getAttribute('onclick').match(/\d+/)[0]));
       if (tags.length > 0) {
@@ -1240,12 +1205,10 @@
       const dateStr = formatDate(year, month, day);
       document.getElementById('popup-date').textContent = `${day} ${monthNames[month].toLowerCase()} ${year}`;
       
-      // Генерируем список сотрудников для выбора
       const listEl = document.getElementById('day-employees-list');
       const assignedEl = document.getElementById('day-assigned-employee');
       const assignedNameEl = document.getElementById('assigned-employee-name');
       
-      // Проверяем, назначен ли уже сотрудник
       const existing = schedule.find(s => s.pointId === currentPointId && s.date === dateStr);
       
       if (existing) {
@@ -1260,11 +1223,10 @@
         if (employees.length === 0) {
           listEl.innerHTML = '<p style="color: #94a3b8;">Сначала добавьте сотрудников</p>';
         } else {
-          // Сортируем сотрудников: сначала рекомендованные для этого ПВЗ
           const sortedEmployees = [...employees].sort((a, b) => {
             const aHasTag = employeeTags[a.id] && employeeTags[a.id].includes(currentPointId);
             const bHasTag = employeeTags[b.id] && employeeTags[b.id].includes(currentPointId);
-            return bHasTag - aHasTag; // Рекомендованные вверху
+            return bHasTag - aHasTag;
           });
           
           let html = '';
@@ -1305,13 +1267,9 @@
     }
     
     function deletePoint(pointId) {
-      // Удаляем сам ПВЗ
       points = points.filter(p => p.id !== pointId);
-      
-      // Удаляем все записи из графика для этого ПВЗ
       schedule = schedule.filter(s => s.pointId !== pointId);
       
-      // Удаляем теги для этого ПВЗ у всех сотрудников
       for (let empId in employeeTags) {
         employeeTags[empId] = employeeTags[empId].filter(pid => pid !== pointId);
         if (employeeTags[empId].length === 0) {
@@ -1323,7 +1281,6 @@
       localStorage.setItem('pvz_schedule', JSON.stringify(schedule));
       localStorage.setItem('pvz_employee_tags', JSON.stringify(employeeTags));
       
-      // Если удаляем текущий ПВЗ, сбрасываем выбор
       if (currentPointId === pointId) {
         currentPointId = null;
         updateCalendarView();
@@ -1349,13 +1306,8 @@
     }
     
     function deleteEmployee(employeeId) {
-      // Удаляем самого сотрудника
       employees = employees.filter(e => e.id !== employeeId);
-      
-      // Удаляем все записи из графика для этого сотрудника
       schedule = schedule.filter(s => s.employeeId !== employeeId);
-      
-      // Удаляем теги
       delete employeeTags[employeeId];
       
       localStorage.setItem('pvz_employees', JSON.stringify(employees));
@@ -1374,10 +1326,8 @@
         return;
       }
       
-      // Удаляем старую запись для этого дня (если есть)
       schedule = schedule.filter(s => !(s.pointId === currentPointId && s.date === dateStr));
       
-      // Добавляем новую
       schedule.push({
         pointId: currentPointId,
         employeeId: employeeId,
@@ -1395,7 +1345,6 @@
     // ===== ОЧИСТКА ДНЯ =====
     function clearDayAssignment() {
       const dateStr = document.getElementById('popup-date').textContent;
-      // Извлекаем дату из формата "27 января 2026"
       const [day, monthName, year] = dateStr.split(' ');
       const monthIndex = monthNames.findIndex(m => m.toLowerCase() === monthName);
       const fullDate = formatDate(parseInt(year), monthIndex, parseInt(day));
@@ -1408,12 +1357,11 @@
       generateCalendar(currentYear, currentMonth);
     }
     
-    // ===== ВЫБОР ПВЗ ДЛЯ РЕДАКТИРОВАНИЯ =====
+    // ===== ВЫБОР ПВЗ =====
     function selectPointForEditing(pointId) {
       const point = points.find(p => p.id === pointId);
       currentPointId = pointId;
       
-      // Обновляем кнопку выбора
       document.getElementById('selected-point-name').textContent = point.name;
       
       updateCalendarView();
@@ -1425,18 +1373,14 @@
     function updateCalendarView() {
       const placeholder = document.getElementById('calendar-placeholder');
       const content = document.getElementById('calendar-content');
-      const addressHeader = document.getElementById('point-address-header');
       const selectBtn = document.getElementById('selected-point-name');
       
       if (!currentPointId) {
-        // Календарь недоступен
         placeholder.style.display = 'block';
         content.style.display = 'none';
         selectBtn.textContent = 'Выберите пункт выдачи';
       } else {
-        // Показываем календарь
         const point = points.find(p => p.id === currentPointId);
-        addressHeader.textContent = point.address;
         selectBtn.textContent = point.name;
         
         placeholder.style.display = 'none';
@@ -1567,16 +1511,12 @@
     
     // ===== ЭКСПОРТ В EXCEL =====
     function exportToExcel() {
-      // Создаём данные для экспорта
       const data = [];
       
-      // Заголовки
       data.push(['Дата', 'Пункт выдачи', 'Адрес', 'Сотрудник', 'Телефон', 'Ставка']);
       
-      // Сортируем график по дате
       const sortedSchedule = [...schedule].sort((a, b) => a.date.localeCompare(b.date));
       
-      // Заполняем данные
       sortedSchedule.forEach(entry => {
         const point = points.find(p => p.id === entry.pointId);
         const employee = employees.find(e => e.id === entry.employeeId);
@@ -1593,10 +1533,8 @@
         }
       });
       
-      // Создаём CSV
       const csvContent = data.map(row => row.join(',')).join('\n');
       
-      // Создаём ссылку для скачивания
       const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -1612,9 +1550,3 @@
   </script>
 </body>
 </html>
-
-
-
-
-
-
