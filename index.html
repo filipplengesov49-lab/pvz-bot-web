@@ -348,7 +348,8 @@
       font-weight: 500;
     }
     
-    .form-group input {
+    .form-group input,
+    .form-group select {
       width: 100%;
       padding: 12px 14px;
       border: 1px solid #e2e8f0;
@@ -359,7 +360,8 @@
       transition: border-color 0.2s;
     }
     
-    .form-group input:focus {
+    .form-group input:focus,
+    .form-group select:focus {
       outline: none;
       border-color: #3b82f6;
     }
@@ -568,6 +570,22 @@
       color: #94a3b8;
     }
     
+    .report-section {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      text-align: center;
+    }
+    
+    .report-section .btn {
+      width: 100%;
+      padding: 16px;
+      font-size: 16px;
+      background: #1e40af;
+    }
+    
     .export-section {
       background: white;
       border-radius: 12px;
@@ -582,6 +600,64 @@
       padding: 16px;
       font-size: 16px;
       background: #031D5B;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    
+    th, td {
+      border: 1px solid #e2e8f0;
+      padding: 10px 12px;
+      text-align: left;
+      font-size: 14px;
+    }
+    
+    th {
+      background: #dbeafe;
+      font-weight: 600;
+      color: #1e40af;
+    }
+    
+    tr:nth-child(even) {
+      background: #f8fafc;
+    }
+    
+    tr:hover {
+      background: #edf2f7;
+    }
+    
+    .report-total {
+      font-weight: bold;
+      background: #dbeafe !important;
+      color: #1e40af !important;
+    }
+    
+    .date-picker {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin-bottom: 15px;
+    }
+    
+    .date-picker label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 500;
+      color: #334155;
+    }
+    
+    .date-picker input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      font-size: 15px;
     }
   </style>
 </head>
@@ -630,7 +706,6 @@
       </div>
       
       <div id="calendar-content" style="display: none;">
-        <!-- УДАЛЁН БЛОК .point-address-header (дублирование названия) -->
         <div class="calendar">
           <div class="month-header">
             <button class="month-nav" onclick="changeMonth(-1)">❮</button>
@@ -651,6 +726,11 @@
           </div>
         </div>
       </div>
+    </div>
+    
+    <!-- Кнопка создания отчёта -->
+    <div class="report-section">
+      <button class="btn btn-primary" onclick="showReportPopup()">📊 Создать отчёт</button>
     </div>
     
     <div class="export-section">
@@ -795,6 +875,70 @@
     </div>
   </div>
   
+  <!-- Поп-ап отчёта -->
+  <div class="popup" id="report-popup">
+    <div class="popup-content">
+      <div class="popup-header">
+        <h3>Создать отчёт по зарплате</h3>
+        <button class="popup-close" onclick="closePopup('report-popup')">×</button>
+      </div>
+      
+      <div class="date-picker">
+        <div class="form-group">
+          <label for="report-start-date">Начальная дата</label>
+          <input type="date" id="report-start-date">
+        </div>
+        <div class="form-group">
+          <label for="report-end-date">Конечная дата</label>
+          <input type="date" id="report-end-date">
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label for="report-point">Пункт выдачи</label>
+        <select id="report-point" class="form-control">
+          <option value="all">Все пункты</option>
+          <!-- Опции будут генерироваться динамически -->
+        </select>
+      </div>
+      
+      <div style="text-align: center; margin-top: 20px;">
+        <button class="btn btn-primary" onclick="generateReport()">Сформировать отчёт</button>
+      </div>
+      
+      <div id="report-result" style="margin-top: 25px; display: none;">
+        <h4 style="margin-bottom: 15px; color: #1e40af;">Результаты отчёта</h4>
+        <div style="max-height: 400px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px;">
+          <table id="report-table">
+            <thead>
+              <tr>
+                <th>ФИО сотрудника</th>
+                <th>Пункт</th>
+                <th>Кол-во смен</th>
+                <th>Ставка</th>
+                <th>Итого</th>
+              </tr>
+            </thead>
+            <tbody id="report-table-body">
+              <!-- Данные будут вставляться сюда -->
+            </tbody>
+            <tfoot>
+              <tr class="report-total">
+                <td colspan="3" style="text-align: right;">ВСЕГО:</td>
+                <td id="report-total-count">0</td>
+                <td id="report-total-sum">0 ₽</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+        
+        <div style="text-align: center; margin-top: 20px;">
+          <button class="btn btn-warning" onclick="exportReportToExcel()">📥 Экспортировать отчёт</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
   <!-- Уведомления -->
   <div class="toast" id="toast"></div>
   
@@ -814,6 +958,7 @@
     document.addEventListener('DOMContentLoaded', () => {
       updateStats();
       updateCalendarView();
+      setupReportDates();
     });
     
     // ===== ВАЛИДАЦИЯ ТЕЛЕФОНА =====
@@ -919,7 +1064,7 @@
       document.getElementById(id).classList.remove('active');
     }
     
-    // ===== ИЗМЕНЕНО: ТОЛЬКО АДРЕС (БЕЗ НАЗВАНИЯ) =====
+    // ===== ФУНКЦИИ ПВЗ (ТОЛЬКО АДРЕС) =====
     function showAddPointPopup() {
       editingPointId = null;
       document.getElementById('point-address').value = '';
@@ -1010,7 +1155,7 @@
       updateCalendarView();
     }
     
-    // ===== ОСТАЛЬНЫЕ ФУНКЦИИ БЕЗ ИЗМЕНЕНИЙ =====
+    // ===== ФУНКЦИИ СОТРУДНИКОВ =====
     function showAddEmployeePopup() {
       editingEmployeeId = null;
       document.getElementById('employee-name').value = '';
@@ -1164,6 +1309,7 @@
       btn.classList.toggle('selected');
     }
     
+    // ===== ФУНКЦИИ СПИСКОВ =====
     function showPointsList() {
       document.getElementById('points-list-title').textContent = 'Мои пункты выдачи';
       renderPointsList();
@@ -1181,6 +1327,7 @@
       showPopup('employees-list-popup');
     }
     
+    // ===== ФУНКЦИИ КАЛЕНДАРЯ И ДНЯ =====
     function showDayPopup(day, month, year) {
       const dateStr = formatDate(year, month, day);
       document.getElementById('popup-date').textContent = `${day} ${monthNames[month].toLowerCase()} ${year}`;
@@ -1232,6 +1379,43 @@
       showPopup('day-popup');
     }
     
+    function assignEmployeeToDay(employeeId, dateStr) {
+      if (!currentPointId) {
+        showToast('❌ Сначала выберите пункт выдачи', 'error');
+        return;
+      }
+      
+      schedule = schedule.filter(s => !(s.pointId === currentPointId && s.date === dateStr));
+      
+      schedule.push({
+        pointId: currentPointId,
+        employeeId: employeeId,
+        date: dateStr
+      });
+      
+      localStorage.setItem('pvz_schedule', JSON.stringify(schedule));
+      
+      const employee = employees.find(e => e.id === employeeId);
+      showToast(`📅 ${employee.name} назначен на ${dateStr}`, 'success');
+      closePopup('day-popup');
+      generateCalendar(currentYear, currentMonth);
+    }
+    
+    function clearDayAssignment() {
+      const dateStr = document.getElementById('popup-date').textContent;
+      const [day, monthName, year] = dateStr.split(' ');
+      const monthIndex = monthNames.findIndex(m => m.toLowerCase() === monthName);
+      const fullDate = formatDate(parseInt(year), monthIndex, parseInt(day));
+      
+      schedule = schedule.filter(s => !(s.pointId === currentPointId && s.date === fullDate));
+      localStorage.setItem('pvz_schedule', JSON.stringify(schedule));
+      
+      showToast('✅ День очищен', 'success');
+      closePopup('day-popup');
+      generateCalendar(currentYear, currentMonth);
+    }
+    
+    // ===== ФУНКЦИИ УДАЛЕНИЯ =====
     function confirmDeletePoint(pointId) {
       const point = points.find(p => p.id === pointId);
       document.getElementById('confirm-delete-message').textContent = 
@@ -1297,42 +1481,7 @@
       renderEmployeesList();
     }
     
-    function assignEmployeeToDay(employeeId, dateStr) {
-      if (!currentPointId) {
-        showToast('❌ Сначала выберите пункт выдачи', 'error');
-        return;
-      }
-      
-      schedule = schedule.filter(s => !(s.pointId === currentPointId && s.date === dateStr));
-      
-      schedule.push({
-        pointId: currentPointId,
-        employeeId: employeeId,
-        date: dateStr
-      });
-      
-      localStorage.setItem('pvz_schedule', JSON.stringify(schedule));
-      
-      const employee = employees.find(e => e.id === employeeId);
-      showToast(`📅 ${employee.name} назначен на ${dateStr}`, 'success');
-      closePopup('day-popup');
-      generateCalendar(currentYear, currentMonth);
-    }
-    
-    function clearDayAssignment() {
-      const dateStr = document.getElementById('popup-date').textContent;
-      const [day, monthName, year] = dateStr.split(' ');
-      const monthIndex = monthNames.findIndex(m => m.toLowerCase() === monthName);
-      const fullDate = formatDate(parseInt(year), monthIndex, parseInt(day));
-      
-      schedule = schedule.filter(s => !(s.pointId === currentPointId && s.date === fullDate));
-      localStorage.setItem('pvz_schedule', JSON.stringify(schedule));
-      
-      showToast('✅ День очищен', 'success');
-      closePopup('day-popup');
-      generateCalendar(currentYear, currentMonth);
-    }
-    
+    // ===== ФУНКЦИИ ВЫБОРА ПВЗ =====
     function selectPointForEditing(pointId) {
       const point = points.find(p => p.id === pointId);
       currentPointId = pointId;
@@ -1343,7 +1492,6 @@
       showToast(`✅ Выбран: ${point.name}`, 'success');
     }
     
-    // ===== ИСПРАВЛЕНО: УДАЛЁН КОД ОБНОВЛЕНИЯ .point-address-header =====
     function updateCalendarView() {
       const placeholder = document.getElementById('calendar-placeholder');
       const content = document.getElementById('calendar-content');
@@ -1364,7 +1512,7 @@
       }
     }
     
-    // ===== ИЗМЕНЕНО: В СПИСКАХ ТОЛЬКО АДРЕС (БЕЗ ДУБЛИРОВАНИЯ) =====
+    // ===== ФУНКЦИИ ОТОБРАЖЕНИЯ СПИСКОВ =====
     function renderPointsList() {
       const listEl = document.getElementById('points-list');
       
@@ -1464,6 +1612,7 @@
       listEl.innerHTML = html;
     }
     
+    // ===== ФУНКЦИИ СТАТИСТИКИ И УВЕДОМЛЕНИЙ =====
     function updateStats() {
       document.getElementById('points-count').textContent = points.length;
       document.getElementById('employees-count').textContent = employees.length;
@@ -1479,6 +1628,7 @@
       }, 3000);
     }
     
+    // ===== ФУНКЦИИ ЭКСПОРТА =====
     function exportToExcel() {
       const data = [];
       data.push(['Дата', 'Пункт выдачи', 'Адрес', 'Сотрудник', 'Телефон', 'Ставка']);
@@ -1514,6 +1664,183 @@
       document.body.removeChild(link);
       
       showToast('✅ Данные экспортированы в CSV!', 'success');
+    }
+    
+    // ===== ФУНКЦИИ ОТЧЁТА =====
+    function setupReportDates() {
+      const today = new Date();
+      const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+      const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+      
+      document.getElementById('report-start-date').valueAsDate = firstDay;
+      document.getElementById('report-end-date').valueAsDate = lastDay;
+    }
+    
+    function showReportPopup() {
+      // Заполняем селект пунктами
+      const pointSelect = document.getElementById('report-point');
+      pointSelect.innerHTML = '<option value="all">Все пункты</option>';
+      
+      points.forEach(point => {
+        const option = document.createElement('option');
+        option.value = point.id;
+        option.textContent = point.name;
+        pointSelect.appendChild(option);
+      });
+      
+      // Скрываем результаты предыдущего отчёта
+      document.getElementById('report-result').style.display = 'none';
+      
+      showPopup('report-popup');
+    }
+    
+    function generateReport() {
+      const startDateStr = document.getElementById('report-start-date').value;
+      const endDateStr = document.getElementById('report-end-date').value;
+      const pointFilter = document.getElementById('report-point').value;
+      
+      if (!startDateStr || !endDateStr) {
+        showToast('Выберите даты для отчёта', 'error');
+        return;
+      }
+      
+      const startDate = new Date(startDateStr);
+      const endDate = new Date(endDateStr);
+      
+      // Фильтруем график по датам и пункту
+      const filteredSchedule = schedule.filter(entry => {
+        const entryDate = new Date(entry.date);
+        const inDateRange = entryDate >= startDate && entryDate <= endDate;
+        const matchesPoint = pointFilter === 'all' || entry.pointId === parseInt(pointFilter);
+        return inDateRange && matchesPoint;
+      });
+      
+      if (filteredSchedule.length === 0) {
+        showToast('Нет данных за выбранный период', 'warning');
+        document.getElementById('report-result').style.display = 'none';
+        return;
+      }
+      
+      // Группируем данные по сотруднику и пункту
+      const reportMap = new Map();
+      
+      filteredSchedule.forEach(entry => {
+        const employee = employees.find(e => e.id === entry.employeeId);
+        const point = points.find(p => p.id === entry.pointId);
+        
+        if (!employee || !point) return;
+        
+        const key = `${entry.employeeId}_${entry.pointId}`;
+        
+        if (!reportMap.has(key)) {
+          reportMap.set(key, {
+            employeeName: employee.name,
+            pointName: point.name,
+            pointId: entry.pointId,
+            employeeId: entry.employeeId,
+            count: 0,
+            rate: employee.rate
+          });
+        }
+        
+        reportMap.get(key).count++;
+      });
+      
+      // Преобразуем в массив и сортируем
+      const reportData = Array.from(reportMap.values()).sort((a, b) => 
+        a.employeeName.localeCompare(b.employeeName)
+      );
+      
+      // Отображаем таблицу
+      renderReportTable(reportData);
+      
+      // Показываем результаты
+      document.getElementById('report-result').style.display = 'block';
+    }
+    
+    function renderReportTable(data) {
+      const tableBody = document.getElementById('report-table-body');
+      tableBody.innerHTML = '';
+      
+      let totalCount = 0;
+      let totalSum = 0;
+      
+      data.forEach(item => {
+        const row = document.createElement('tr');
+        const total = item.count * item.rate;
+        
+        row.innerHTML = `
+          <td>${item.employeeName}</td>
+          <td>${item.pointName}</td>
+          <td>${item.count}</td>
+          <td>${item.rate} ₽</td>
+          <td>${total.toFixed(2)} ₽</td>
+        `;
+        
+        tableBody.appendChild(row);
+        
+        totalCount += item.count;
+        totalSum += total;
+      });
+      
+      // Обновляем итоги
+      document.getElementById('report-total-count').textContent = totalCount;
+      document.getElementById('report-total-sum').textContent = `${totalSum.toFixed(2)} ₽`;
+    }
+    
+    function exportReportToExcel() {
+      const table = document.getElementById('report-table');
+      const rows = table.querySelectorAll('tr');
+      
+      if (rows.length <= 2) {
+        showToast('Нет данных для экспорта', 'error');
+        return;
+      }
+      
+      // Собираем данные
+      const reportData = [];
+      
+      // Заголовки
+      const headers = [];
+      rows[0].querySelectorAll('th').forEach(th => {
+        headers.push(th.textContent);
+      });
+      reportData.push(headers);
+      
+      // Данные
+      for (let i = 1; i < rows.length - 1; i++) {
+        const rowData = [];
+        rows[i].querySelectorAll('td').forEach(td => {
+          rowData.push(td.textContent);
+        });
+        reportData.push(rowData);
+      }
+      
+      // Итоги
+      const totalRow = [];
+      rows[rows.length - 1].querySelectorAll('td').forEach(td => {
+        totalRow.push(td.textContent);
+      });
+      reportData.push(['', '', '', '', '']);
+      reportData.push(['ИТОГО:', '', ...totalRow.slice(2)]);
+      
+      // Создаём CSV
+      const csvContent = reportData.map(row => 
+        row.map(cell => `"${cell.replace(/"/g, '""')}"`).join(',')
+      ).join('\n');
+      
+      // Скачиваем файл
+      const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', `otchet_zarplata_${new Date().toISOString().split('T')[0]}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      showToast('✅ Отчёт экспортирован в CSV!', 'success');
     }
   </script>
 </body>
