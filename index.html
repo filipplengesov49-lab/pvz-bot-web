@@ -130,6 +130,36 @@
       position: relative;
     }
     
+    .point-select-container {
+      background: #dbeafe;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    
+    .point-select-btn {
+      width: 100%;
+      padding: 12px 20px;
+      background: #1e40af;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+    
+    .point-select-btn:hover {
+      background: #1d4ed8;
+      transform: translateY(-2px);
+    }
+    
     .point-address-header {
       background: #dbeafe;
       color: #1e40af;
@@ -421,11 +451,6 @@
       color: #b91c1c;
     }
     
-    .action-btn.calendar {
-      background: #dbeafe;
-      color: #1e40af;
-    }
-    
     .action-btn.edit {
       background: #fef3c7;
       color: #b45309;
@@ -602,6 +627,13 @@
     </div>
     
     <div class="calendar-container">
+      <div class="point-select-container">
+        <button class="point-select-btn" onclick="showPointsListForCalendar()">
+          <span>📍</span>
+          <span id="selected-point-name">Выберите пункт выдачи</span>
+        </button>
+      </div>
+      
       <div id="calendar-placeholder" class="no-calendar">
         <div class="no-calendar-icon">📅</div>
         <h3>Календарь недоступен</h3>
@@ -699,7 +731,7 @@
   <div class="popup" id="points-list-popup">
     <div class="popup-content">
       <div class="popup-header">
-        <h3>Мои пункты выдачи</h3>
+        <h3 id="points-list-title">Мои пункты выдачи</h3>
         <button class="popup-close" onclick="closePopup('points-list-popup')">×</button>
       </div>
       <div class="points-list" id="points-list">
@@ -933,6 +965,10 @@
       document.getElementById('point-popup-title').textContent = 'Редактировать пункт выдачи';
       document.getElementById('point-save-btn').textContent = 'Сохранить';
       document.getElementById('point-save-btn').className = 'btn btn-edit';
+      
+      // Закрываем окно списка перед открытием редактирования
+      closePopup('points-list-popup');
+      
       showPopup('add-point-popup');
     }
     
@@ -1078,6 +1114,9 @@
         tagsContainer.innerHTML = html;
       }
       
+      // Закрываем окно списка перед открытием редактирования
+      closePopup('employees-list-popup');
+      
       showPopup('add-employee-popup');
     }
     
@@ -1181,7 +1220,14 @@
     }
     
     function showPointsList() {
+      document.getElementById('points-list-title').textContent = 'Мои пункты выдачи';
       renderPointsList();
+      showPopup('points-list-popup');
+    }
+    
+    function showPointsListForCalendar() {
+      document.getElementById('points-list-title').textContent = 'Выберите пункт для просмотра графика';
+      renderPointsListForCalendar();
       showPopup('points-list-popup');
     }
     
@@ -1367,6 +1413,9 @@
       const point = points.find(p => p.id === pointId);
       currentPointId = pointId;
       
+      // Обновляем кнопку выбора
+      document.getElementById('selected-point-name').textContent = point.name;
+      
       updateCalendarView();
       closePopup('points-list-popup');
       showToast(`✅ Выбран: ${point.name}`, 'success');
@@ -1377,15 +1426,18 @@
       const placeholder = document.getElementById('calendar-placeholder');
       const content = document.getElementById('calendar-content');
       const addressHeader = document.getElementById('point-address-header');
+      const selectBtn = document.getElementById('selected-point-name');
       
       if (!currentPointId) {
         // Календарь недоступен
         placeholder.style.display = 'block';
         content.style.display = 'none';
+        selectBtn.textContent = 'Выберите пункт выдачи';
       } else {
         // Показываем календарь
         const point = points.find(p => p.id === currentPointId);
         addressHeader.textContent = point.address;
+        selectBtn.textContent = point.name;
         
         placeholder.style.display = 'none';
         content.style.display = 'block';
@@ -1418,8 +1470,35 @@
             </div>
             <div class="point-actions">
               <button class="action-btn edit" title="Редактировать" onclick="showEditPointPopup(${point.id})">✏️</button>
-              <button class="action-btn calendar" title="Редактировать" onclick="selectPointForEditing(${point.id})">📅</button>
               <button class="action-btn delete" title="Удалить" onclick="confirmDeletePoint(${point.id})">🗑️</button>
+            </div>
+          </div>
+        `;
+      });
+      
+      listEl.innerHTML = html;
+    }
+    
+    function renderPointsListForCalendar() {
+      const listEl = document.getElementById('points-list');
+      
+      if (points.length === 0) {
+        listEl.innerHTML = `
+          <div class="empty-state">
+            <h4>Пункты выдачи</h4>
+            <p>Пока нет пунктов выдачи</p>
+          </div>
+        `;
+        return;
+      }
+      
+      let html = '';
+      points.forEach(point => {
+        html += `
+          <div class="point-item">
+            <div class="point-info" onclick="selectPointForEditing(${point.id})">
+              <div class="point-name">${point.name}</div>
+              <div class="point-address">${point.address}</div>
             </div>
           </div>
         `;
