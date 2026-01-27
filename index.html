@@ -98,7 +98,7 @@
     }
     
     .btn-secondary {
-      background: #7B99EC; /* Изменено на светло-синий */
+      background: #7B99EC;
     }
     
     .btn-success {
@@ -106,7 +106,7 @@
     }
     
     .btn-warning {
-      background: #7B99EC; /* Изменено на светло-синий */
+      background: #7B99EC;
     }
     
     .btn-danger {
@@ -141,7 +141,7 @@
     .point-select-btn {
       width: 100%;
       padding: 12px 20px;
-      background: #031D5B; /* Изменено на тёмно-синий */
+      background: #031D5B;
       color: white;
       border: none;
       border-radius: 8px;
@@ -156,7 +156,7 @@
     }
     
     .point-select-btn:hover {
-      background: #052a7a; /* Светлее при наведении */
+      background: #052a7a;
       transform: translateY(-2px);
     }
     
@@ -581,7 +581,7 @@
       width: 100%;
       padding: 16px;
       font-size: 16px;
-      background: #031D5B; /* Изменено на тёмно-синий */
+      background: #031D5B;
     }
   </style>
 </head>
@@ -658,7 +658,7 @@
     </div>
   </div>
   
-  <!-- Поп-ап добавления/редактирования ПВЗ -->
+  <!-- Поп-ап добавления/редактирования ПВЗ (ТОЛЬКО АДРЕС) -->
   <div class="popup" id="add-point-popup">
     <div class="popup-content">
       <div class="popup-header">
@@ -666,12 +666,8 @@
         <button class="popup-close" onclick="closePopup('add-point-popup')">×</button>
       </div>
       <div class="form-group">
-        <label for="point-name">Название пункта выдачи *</label>
-        <input type="text" id="point-name" placeholder="Например: ПВЗ Центральный" maxlength="100">
-      </div>
-      <div class="form-group">
         <label for="point-address">Адрес пункта выдачи *</label>
-        <input type="text" id="point-address" placeholder="ул. Ленина, 10">
+        <input type="text" id="point-address" placeholder="ул. Ленина, 10" maxlength="200">
       </div>
       <div class="form-actions">
         <button class="btn btn-back" onclick="closePopup('add-point-popup')">Отмена</button>
@@ -923,9 +919,9 @@
       document.getElementById(id).classList.remove('active');
     }
     
+    // ===== ИЗМЕНЕНО: ТОЛЬКО АДРЕС (БЕЗ НАЗВАНИЯ) =====
     function showAddPointPopup() {
       editingPointId = null;
-      document.getElementById('point-name').value = '';
       document.getElementById('point-address').value = '';
       document.getElementById('point-popup-title').textContent = 'Добавить пункт выдачи';
       document.getElementById('point-save-btn').textContent = 'Добавить';
@@ -938,7 +934,6 @@
       if (!point) return;
       
       editingPointId = pointId;
-      document.getElementById('point-name').value = point.name;
       document.getElementById('point-address').value = point.address;
       document.getElementById('point-popup-title').textContent = 'Редактировать пункт выдачи';
       document.getElementById('point-save-btn').textContent = 'Сохранить';
@@ -949,13 +944,7 @@
     }
     
     function savePoint() {
-      const name = document.getElementById('point-name').value.trim();
       const address = document.getElementById('point-address').value.trim();
-      
-      if (!name || name.length < 2) {
-        showToast('Название должно быть не менее 2 символов', 'error');
-        return;
-      }
       
       if (!address || address.length < 5) {
         showToast('Адрес ПВЗ должен быть не менее 5 символов', 'error');
@@ -965,7 +954,7 @@
       if (editingPointId) {
         const index = points.findIndex(p => p.id === editingPointId);
         if (index !== -1) {
-          points[index].name = name;
+          points[index].name = address;
           points[index].address = address;
           localStorage.setItem('pvz_points', JSON.stringify(points));
           closePopup('add-point-popup');
@@ -979,30 +968,21 @@
     }
     
     function addPoint() {
-      const name = document.getElementById('point-name').value.trim();
       const address = document.getElementById('point-address').value.trim();
-      
-      if (!name || name.length < 2) {
-        showToast('Название должно быть не менее 2 символов', 'error');
-        return;
-      }
       
       if (!address || address.length < 5) {
         showToast('Адрес ПВЗ должен быть не менее 5 символов', 'error');
         return;
       }
       
-      const existingPoint = points.find(p => 
-        p.name.toLowerCase() === name.toLowerCase() || 
-        p.address.toLowerCase() === address.toLowerCase()
-      );
+      const existingPoint = points.find(p => p.address.toLowerCase() === address.toLowerCase());
       
       if (existingPoint) {
         document.getElementById('confirm-duplicate-message').textContent = 
-          `Пункт с названием "${name}" или адресом "${address}" уже существует. Добавить ещё раз?`;
+          `Пункт с адресом "${address}" уже существует. Добавить ещё раз?`;
         
         document.getElementById('confirm-add-btn').onclick = () => {
-          doAddPoint(name, address);
+          doAddPoint(address);
           closePopup('confirm-duplicate-popup');
         };
         
@@ -1010,13 +990,13 @@
         return;
       }
       
-      doAddPoint(name, address);
+      doAddPoint(address);
     }
     
-    function doAddPoint(name, address) {
+    function doAddPoint(address) {
       const newPoint = {
         id: points.length > 0 ? Math.max(...points.map(p => p.id)) + 1 : 1,
-        name: name,
+        name: address,
         address: address
       };
       
@@ -1030,6 +1010,7 @@
       updateCalendarView();
     }
     
+    // ===== ОСТАЛЬНЫЕ ФУНКЦИИ БЕЗ ИЗМЕНЕНИЙ =====
     function showAddEmployeePopup() {
       editingEmployeeId = null;
       document.getElementById('employee-name').value = '';
@@ -1383,6 +1364,7 @@
       }
     }
     
+    // ===== ИЗМЕНЕНО: В СПИСКАХ ТОЛЬКО АДРЕС (БЕЗ ДУБЛИРОВАНИЯ) =====
     function renderPointsList() {
       const listEl = document.getElementById('points-list');
       
@@ -1401,8 +1383,7 @@
         html += `
           <div class="point-item">
             <div class="point-info" onclick="selectPointForEditing(${point.id})">
-              <div class="point-name">${point.name}</div>
-              <div class="point-address">${point.address}</div>
+              <div class="point-name">${point.address}</div>
             </div>
             <div class="point-actions">
               <button class="action-btn edit" title="Редактировать" onclick="showEditPointPopup(${point.id})">✏️</button>
@@ -1433,8 +1414,7 @@
         html += `
           <div class="point-item">
             <div class="point-info" onclick="selectPointForEditing(${point.id})">
-              <div class="point-name">${point.name}</div>
-              <div class="point-address">${point.address}</div>
+              <div class="point-name">${point.address}</div>
             </div>
           </div>
         `;
