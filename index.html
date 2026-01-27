@@ -542,7 +542,6 @@
       color: #94a3b8;
     }
     
-    /* ===== СЕКЦИЯ ОТЧЁТА ===== */
     .report-section {
       background: white;
       border-radius: 12px;
@@ -575,11 +574,10 @@
       background: #031D5B;
     }
     
-    /* ===== ТАБЛИЦА ОТЧЁТА (ИСПРАВЛЕНО) ===== */
     .report-table-container {
       max-height: 400px;
       overflow-y: auto;
-      overflow-x: auto; /* Горизонтальная прокрутка при широкой таблице */
+      overflow-x: auto;
       border: 1px solid #e2e8f0;
       border-radius: 8px;
       margin-top: 15px;
@@ -588,11 +586,11 @@
     }
     
     table {
-      width: auto; /* Автоматическая ширина под содержимое */
-      min-width: 100%; /* Минимум на ширину контейнера */
+      width: auto;
+      min-width: 100%;
       border-collapse: collapse;
       background: white;
-      table-layout: auto; /* Автоматическая подгонка колонок */
+      table-layout: auto;
     }
     
     th, td {
@@ -601,11 +599,10 @@
       text-align: left;
       font-size: 14px;
       vertical-align: middle;
-      white-space: nowrap; /* ЗАПРЕТ ПЕРЕНОСА ТЕКСТА ВО ВСЕХ ЯЧЕЙКАХ */
+      white-space: nowrap;
       word-wrap: normal;
     }
     
-    /* Числовые колонки: выравнивание по правому краю */
     th:nth-child(3), th:nth-child(4), th:nth-child(5),
     td:nth-child(3), td:nth-child(4), td:nth-child(5) {
       text-align: right;
@@ -738,20 +735,17 @@
     </div>
   </div>
   
-  <!-- Поп-ап добавления/редактирования ПВЗ -->
+  <!-- Поп-ап добавления/редактирования ПВЗ (ТОЛЬКО АДРЕС) -->
   <div class="popup" id="add-point-popup">
     <div class="popup-content">
       <div class="popup-header">
         <h3 id="point-popup-title">Добавить пункт выдачи</h3>
         <button class="popup-close" onclick="closePopup('add-point-popup')">×</button>
       </div>
-      <div class="form-group">
-        <label for="point-name">Название пункта выдачи *</label>
-        <input type="text" id="point-name" placeholder="Например: ПВЗ Центральный" maxlength="100">
-      </div>
+      <!-- УДАЛЕНО ПОЛЕ НАЗВАНИЯ -->
       <div class="form-group">
         <label for="point-address">Адрес пункта выдачи *</label>
-        <input type="text" id="point-address" placeholder="ул. Ленина, 10">
+        <input type="text" id="point-address" placeholder="ул. Ленина, 10" maxlength="200">
       </div>
       <div class="form-actions">
         <button class="btn btn-back" onclick="closePopup('add-point-popup')">Отмена</button>
@@ -1069,10 +1063,9 @@
       document.getElementById(id).classList.remove('active');
     }
     
-    // ===== ФУНКЦИИ ПВЗ =====
+    // ===== ИЗМЕНЕНО: ТОЛЬКО АДРЕС (БЕЗ НАЗВАНИЯ) =====
     function showAddPointPopup() {
       editingPointId = null;
-      document.getElementById('point-name').value = '';
       document.getElementById('point-address').value = '';
       document.getElementById('point-popup-title').textContent = 'Добавить пункт выдачи';
       document.getElementById('point-save-btn').textContent = 'Добавить';
@@ -1085,7 +1078,6 @@
       if (!point) return;
       
       editingPointId = pointId;
-      document.getElementById('point-name').value = point.name;
       document.getElementById('point-address').value = point.address;
       document.getElementById('point-popup-title').textContent = 'Редактировать пункт выдачи';
       document.getElementById('point-save-btn').textContent = 'Сохранить';
@@ -1096,13 +1088,7 @@
     }
     
     function savePoint() {
-      const name = document.getElementById('point-name').value.trim();
       const address = document.getElementById('point-address').value.trim();
-      
-      if (!name || name.length < 2) {
-        showToast('Название должно быть не менее 2 символов', 'error');
-        return;
-      }
       
       if (!address || address.length < 5) {
         showToast('Адрес ПВЗ должен быть не менее 5 символов', 'error');
@@ -1112,7 +1098,7 @@
       if (editingPointId) {
         const index = points.findIndex(p => p.id === editingPointId);
         if (index !== -1) {
-          points[index].name = name;
+          points[index].name = address;
           points[index].address = address;
           localStorage.setItem('pvz_points', JSON.stringify(points));
           closePopup('add-point-popup');
@@ -1126,30 +1112,21 @@
     }
     
     function addPoint() {
-      const name = document.getElementById('point-name').value.trim();
       const address = document.getElementById('point-address').value.trim();
-      
-      if (!name || name.length < 2) {
-        showToast('Название должно быть не менее 2 символов', 'error');
-        return;
-      }
       
       if (!address || address.length < 5) {
         showToast('Адрес ПВЗ должен быть не менее 5 символов', 'error');
         return;
       }
       
-      const existingPoint = points.find(p => 
-        p.name.toLowerCase() === name.toLowerCase() || 
-        p.address.toLowerCase() === address.toLowerCase()
-      );
+      const existingPoint = points.find(p => p.address.toLowerCase() === address.toLowerCase());
       
       if (existingPoint) {
         document.getElementById('confirm-duplicate-message').textContent = 
-          `Пункт с названием "${name}" или адресом "${address}" уже существует. Добавить ещё раз?`;
+          `Пункт с адресом "${address}" уже существует. Добавить ещё раз?`;
         
         document.getElementById('confirm-add-btn').onclick = () => {
-          doAddPoint(name, address);
+          doAddPoint(address);
           closePopup('confirm-duplicate-popup');
         };
         
@@ -1157,13 +1134,13 @@
         return;
       }
       
-      doAddPoint(name, address);
+      doAddPoint(address);
     }
     
-    function doAddPoint(name, address) {
+    function doAddPoint(address) {
       const newPoint = {
         id: points.length > 0 ? Math.max(...points.map(p => p.id)) + 1 : 1,
-        name: name,
+        name: address,
         address: address
       };
       
@@ -1553,8 +1530,7 @@
         html += `
           <div class="point-item">
             <div class="point-info" onclick="selectPointForEditing(${point.id})">
-              <div class="point-name">${point.name}</div>
-              <div class="point-address">${point.address}</div>
+              <div class="point-name">${point.address}</div>
             </div>
             <div class="point-actions">
               <button class="action-btn edit" title="Редактировать" onclick="showEditPointPopup(${point.id})">✏️</button>
@@ -1585,8 +1561,7 @@
         html += `
           <div class="point-item">
             <div class="point-info" onclick="selectPointForEditing(${point.id})">
-              <div class="point-name">${point.name}</div>
-              <div class="point-address">${point.address}</div>
+              <div class="point-name">${point.address}</div>
             </div>
           </div>
         `;
@@ -1654,14 +1629,11 @@
     
     // ===== ФУНКЦИИ ЭКСПОРТА (ИСПРАВЛЕНО: КОРРЕКТНАЯ КОДИРОВКА) =====
     function exportToExcel() {
-      // Формируем содержимое с правильной структурой для Excel
-      let csvContent = '\ufeff'; // BOM для корректной кодировки в Excel
+      let csvContent = '\ufeff';
       
-      // Заголовки
       const headers = ['Дата', 'Пункт выдачи', 'Адрес', 'Сотрудник', 'Телефон', 'Ставка'];
       csvContent += headers.map(cell => `"${cell.replace(/"/g, '""')}"`).join(',') + '\r\n';
       
-      // Данные
       const sortedSchedule = [...schedule].sort((a, b) => a.date.localeCompare(b.date));
       sortedSchedule.forEach(entry => {
         const point = points.find(p => p.id === entry.pointId);
@@ -1680,12 +1652,7 @@
         }
       });
       
-      // Создаём Blob с правильной кодировкой
-      const blob = new Blob([csvContent], { 
-        type: 'text/csv;charset=utf-8;'
-      });
-      
-      // Скачиваем файл
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.setAttribute('href', url);
@@ -1709,7 +1676,6 @@
     }
     
     function showReportPopup() {
-      // Заполняем селект пунктами
       const pointSelect = document.getElementById('report-point');
       pointSelect.innerHTML = '<option value="all">Все пункты</option>';
       
@@ -1720,9 +1686,7 @@
         pointSelect.appendChild(option);
       });
       
-      // Скрываем результаты предыдущего отчёта
       document.getElementById('report-result').style.display = 'none';
-      
       showPopup('report-popup');
     }
     
@@ -1739,7 +1703,6 @@
       const startDate = new Date(startDateStr);
       const endDate = new Date(endDateStr);
       
-      // Фильтруем график по датам и пункту
       const filteredSchedule = schedule.filter(entry => {
         const entryDate = new Date(entry.date);
         const inDateRange = entryDate >= startDate && entryDate <= endDate;
@@ -1753,7 +1716,6 @@
         return;
       }
       
-      // Группируем данные по сотруднику и пункту
       const reportMap = new Map();
       
       filteredSchedule.forEach(entry => {
@@ -1778,15 +1740,11 @@
         reportMap.get(key).count++;
       });
       
-      // Преобразуем в массив и сортируем
       const reportData = Array.from(reportMap.values()).sort((a, b) => 
         a.employeeName.localeCompare(b.employeeName)
       );
       
-      // Отображаем таблицу
       renderReportTable(reportData);
-      
-      // Показываем результаты
       document.getElementById('report-result').style.display = 'block';
     }
     
@@ -1801,17 +1759,12 @@
         const row = document.createElement('tr');
         const total = item.count * item.rate;
         
-        // Форматируем числа для отображения
-        const formattedCount = item.count;
-        const formattedRate = `${item.rate} ₽`;
-        const formattedTotal = `${total.toFixed(2)} ₽`;
-        
         row.innerHTML = `
           <td>${item.employeeName}</td>
           <td>${item.pointName}</td>
-          <td>${formattedCount}</td>
-          <td>${formattedRate}</td>
-          <td>${formattedTotal}</td>
+          <td>${item.count}</td>
+          <td>${item.rate} ₽</td>
+          <td>${total.toFixed(2)} ₽</td>
         `;
         
         tableBody.appendChild(row);
@@ -1820,20 +1773,16 @@
         totalSum += total;
       });
       
-      // Обновляем итоги
       document.getElementById('report-total-count').textContent = totalCount;
       document.getElementById('report-total-sum').textContent = `${totalSum.toFixed(2)} ₽`;
     }
     
     function exportReportToExcel() {
-      // Формируем содержимое с правильной структурой для Excel
-      let csvContent = '\ufeff'; // BOM для корректной кодировки в Excel
+      let csvContent = '\ufeff';
       
-      // Заголовки
       const headers = ['ФИО сотрудника', 'Пункт', 'Кол-во смен', 'Ставка', 'Итого'];
       csvContent += headers.map(cell => `"${cell.replace(/"/g, '""')}"`).join(',') + '\r\n';
       
-      // Данные
       const table = document.getElementById('report-table');
       const rows = table.querySelectorAll('tbody tr');
       
@@ -1845,10 +1794,8 @@
         csvContent += rowData.map(cell => `"${cell}"`).join(',') + '\r\n';
       });
       
-      // Пустая строка
       csvContent += '\r\n';
       
-      // Итоги
       const totalRow = table.querySelector('tfoot tr');
       const totalCells = totalRow.querySelectorAll('td');
       const totalData = Array.from(totalCells).map(cell => 
@@ -1856,12 +1803,7 @@
       );
       csvContent += totalData.map(cell => `"${cell}"`).join(',') + '\r\n';
       
-      // Создаём Blob с правильной кодировкой
-      const blob = new Blob([csvContent], { 
-        type: 'text/csv;charset=utf-8;'
-      });
-      
-      // Скачиваем файл
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.setAttribute('href', url);
