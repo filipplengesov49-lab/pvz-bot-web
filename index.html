@@ -656,6 +656,54 @@
       border-radius: 6px;
       font-size: 15px;
     }
+    
+    /* ===== НОВЫЕ СТИЛИ ДЛЯ ЧАСОВ И МНОЖЕСТВЕННЫХ СОТРУДНИКОВ ===== */
+    .day-employees-assigned {
+      margin-top: 15px;
+      border-top: 1px solid #e2e8f0;
+      padding-top: 15px;
+    }
+    
+    .assigned-employee-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    
+    .assigned-employee-info {
+      flex: 1;
+    }
+    
+    .assigned-employee-hours {
+      min-width: 80px;
+      text-align: right;
+      font-weight: 500;
+      color: #1e40af;
+    }
+    
+    .hours-input {
+      width: 60px;
+      padding: 6px;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      text-align: center;
+      font-size: 14px;
+    }
+    
+    .add-more-btn {
+      margin-top: 15px;
+      width: 100%;
+    }
+    
+    .hours-label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 500;
+      color: #334155;
+      font-size: 14px;
+    }
   </style>
 </head>
 <body>
@@ -742,7 +790,6 @@
         <h3 id="point-popup-title">Добавить пункт выдачи</h3>
         <button class="popup-close" onclick="closePopup('add-point-popup')">×</button>
       </div>
-      <!-- ЕДИНСТВЕННОЕ ПОЛЕ: АДРЕС -->
       <div class="form-group">
         <label for="point-address">Адрес пункта выдачи *</label>
         <input type="text" id="point-address" placeholder="ул. Ленина, 10" maxlength="200">
@@ -754,7 +801,7 @@
     </div>
   </div>
   
-  <!-- Поп-ап добавления/редактирования сотрудника -->
+  <!-- Поп-ап добавления/редактирования сотрудника (СТАВКА В ЧАС) -->
   <div class="popup" id="add-employee-popup">
     <div class="popup-content">
       <div class="popup-header">
@@ -771,8 +818,8 @@
                oninput="validatePhone(this)">
       </div>
       <div class="form-group">
-        <label for="employee-rate">Ставка за день (₽)</label>
-        <input type="number" id="employee-rate" placeholder="1000" value="1000" min="0">
+        <label for="employee-rate">Ставка в час (₽)</label>
+        <input type="number" id="employee-rate" placeholder="200" value="200" min="0">
       </div>
       <div class="form-group">
         <label>Теги по пунктам (рекомендации)</label>
@@ -847,27 +894,31 @@
     </div>
   </div>
   
-  <!-- Поп-ап дня календаря -->
+  <!-- Поп-ап дня календаря (ПЕРЕДЕЛАНО ПОД НЕСКОЛЬКИХ СОТРУДНИКОВ И ЧАСЫ) -->
   <div class="popup" id="day-popup">
     <div class="popup-content">
       <div class="popup-header">
         <h3 id="popup-date">27 января</h3>
         <button class="popup-close" onclick="closePopup('day-popup')">×</button>
       </div>
+      
       <div style="text-align: center; padding: 20px;">
         <div style="font-size: 42px; margin-bottom: 15px; color: #64748b;">📅</div>
-        <p style="color: #64748b; margin-bottom: 20px; font-size: 15px;">
-          Выберите сотрудника для работы
-        </p>
-        <div id="day-employees-list">
-          <!-- Список сотрудников для выбора -->
-        </div>
-        <div id="day-assigned-employee" style="display: none; margin-top: 20px;">
-          <p style="color: #22c55e; font-weight: 600; margin-bottom: 10px;">✅ Назначен:</p>
-          <div id="assigned-employee-name" style="font-size: 17px; margin-bottom: 15px; color: #1e293b;"></div>
-          <div style="display: flex; justify-content: center;">
-            <button class="btn btn-danger" onclick="clearDayAssignment()">Очистить день</button>
+        <p style="color: #64748b; margin-bottom: 20px; font-size: 15px;">Добавьте сотрудников для работы в этот день</p>
+        
+        <!-- Список уже назначенных сотрудников -->
+        <div id="day-assigned-employees" style="display: none;">
+          <h4 style="margin-bottom: 10px; color: #1e40af;">Назначенные сотрудники:</h4>
+          <div id="assigned-employees-list" class="day-employees-assigned"></div>
+          <button class="btn btn-secondary add-more-btn" onclick="showEmployeesForDay()">➕ Добавить ещё сотрудника</button>
+          <div style="display: flex; justify-content: center; margin-top: 15px;">
+            <button class="btn btn-danger" onclick="clearDayAssignment()">Очистить весь день</button>
           </div>
+        </div>
+        
+        <!-- Список сотрудников для выбора -->
+        <div id="day-employees-list">
+          <!-- Будет заполнен динамически -->
         </div>
       </div>
     </div>
@@ -912,8 +963,8 @@
               <tr>
                 <th>ФИО сотрудника</th>
                 <th>Пункт</th>
-                <th>Кол-во смен</th>
-                <th>Ставка</th>
+                <th>Часы</th>
+                <th>Ставка в час</th>
                 <th>Итого</th>
               </tr>
             </thead>
@@ -948,10 +999,12 @@
     let currentPointId = null;
     let points = JSON.parse(localStorage.getItem('pvz_points')) || [];
     let employees = JSON.parse(localStorage.getItem('pvz_employees')) || [];
-    let schedule = JSON.parse(localStorage.getItem('pvz_schedule')) || [];
+    // ИЗМЕНЕНО: Структура schedule теперь включает часы
+    let schedule = JSON.parse(localStorage.getItem('pvz_schedule')) || []; // { pointId, employeeId, date, hours }
     let employeeTags = JSON.parse(localStorage.getItem('pvz_employee_tags')) || {};
     let editingPointId = null;
     let editingEmployeeId = null;
+    let currentDayDate = ''; // Для хранения текущей даты в поп-апе дня
     
     // ===== ИНИЦИАЛИЗАЦИЯ =====
     document.addEventListener('DOMContentLoaded', () => {
@@ -1159,7 +1212,7 @@
       editingEmployeeId = null;
       document.getElementById('employee-name').value = '';
       document.getElementById('employee-phone').value = '';
-      document.getElementById('employee-rate').value = '1000';
+      document.getElementById('employee-rate').value = '200';
       document.getElementById('employee-popup-title').textContent = 'Добавить сотрудника';
       document.getElementById('employee-save-btn').textContent = 'Добавить';
       document.getElementById('employee-save-btn').className = 'btn btn-secondary';
@@ -1217,7 +1270,7 @@
     function saveEmployee() {
       const name = document.getElementById('employee-name').value.trim();
       const phone = document.getElementById('employee-phone').value.trim();
-      const rate = parseFloat(document.getElementById('employee-rate').value) || 1000;
+      const rate = parseFloat(document.getElementById('employee-rate').value) || 200;
       
       if (!name || name.length < 2) {
         showToast('ФИО должно быть не менее 2 символов', 'error');
@@ -1254,7 +1307,7 @@
     function addEmployee() {
       const name = document.getElementById('employee-name').value.trim();
       const phone = document.getElementById('employee-phone').value.trim();
-      const rate = parseFloat(document.getElementById('employee-rate').value) || 1000;
+      const rate = parseFloat(document.getElementById('employee-rate').value) || 200;
       
       if (!name || name.length < 2) {
         showToast('ФИО должно быть не менее 2 символов', 'error');
@@ -1329,21 +1382,47 @@
     // ===== ФУНКЦИИ КАЛЕНДАРЯ И ДНЯ =====
     function showDayPopup(day, month, year) {
       const dateStr = formatDate(year, month, day);
+      currentDayDate = dateStr;
       document.getElementById('popup-date').textContent = `${day} ${monthNames[month].toLowerCase()} ${year}`;
       
+      // Находим все записи для этого дня и пункта
+      const daySchedule = schedule.filter(s => 
+        s.pointId === currentPointId && s.date === dateStr
+      );
+      
       const listEl = document.getElementById('day-employees-list');
-      const assignedEl = document.getElementById('day-assigned-employee');
-      const assignedNameEl = document.getElementById('assigned-employee-name');
+      const assignedContainer = document.getElementById('day-assigned-employees');
+      const assignedList = document.getElementById('assigned-employees-list');
       
-      const existing = schedule.find(s => s.pointId === currentPointId && s.date === dateStr);
-      
-      if (existing) {
-        const employee = employees.find(e => e.id === existing.employeeId);
-        assignedNameEl.textContent = employee ? employee.name : 'Неизвестный';
-        assignedEl.style.display = 'block';
+      if (daySchedule.length > 0) {
+        // Показываем назначенных сотрудников
+        assignedContainer.style.display = 'block';
         listEl.style.display = 'none';
+        
+        // Формируем список назначенных
+        let html = '';
+        daySchedule.forEach(entry => {
+          const employee = employees.find(e => e.id === entry.employeeId);
+          if (employee) {
+            html += `
+              <div class="assigned-employee-item">
+                <div class="assigned-employee-info">
+                  <div class="employee-name">${employee.name}</div>
+                  <div class="employee-details">${employee.phone || ''} • ${employee.rate}₽/час</div>
+                </div>
+                <div class="assigned-employee-hours">
+                  <span>${entry.hours || 0} ч</span>
+                  <button class="action-btn delete" style="margin-left: 8px; width: 28px !important; height: 28px !important;" 
+                    onclick="removeEmployeeFromDay(${entry.employeeId}, '${dateStr}')">🗑️</button>
+                </div>
+              </div>
+            `;
+          }
+        });
+        assignedList.innerHTML = html;
       } else {
-        assignedEl.style.display = 'none';
+        // Показываем список для выбора
+        assignedContainer.style.display = 'none';
         listEl.style.display = 'block';
         
         if (employees.length === 0) {
@@ -1359,13 +1438,13 @@
           sortedEmployees.forEach(emp => {
             const isRecommended = employeeTags[emp.id] && employeeTags[emp.id].includes(currentPointId);
             html += `
-              <div class="employee-item" onclick="assignEmployeeToDay(${emp.id}, '${dateStr}')">
+              <div class="employee-item" onclick="selectEmployeeForDay(${emp.id}, '${dateStr}')">
                 <div class="employee-info">
                   <div class="employee-name">
                     ${emp.name}
                     ${isRecommended ? '<span class="recommended-badge">★ Рекомендован</span>' : ''}
                   </div>
-                  <div class="employee-details">${emp.phone || ''} • ${emp.rate}₽/день</div>
+                  <div class="employee-details">${emp.phone || ''} • ${emp.rate}₽/час</div>
                 </div>
                 <div style="font-size: 20px; color: #64748b;">➡️</div>
               </div>
@@ -1378,35 +1457,164 @@
       showPopup('day-popup');
     }
     
-    function assignEmployeeToDay(employeeId, dateStr) {
-      if (!currentPointId) {
-        showToast('❌ Сначала выберите пункт выдачи', 'error');
+    // ===== НОВАЯ ФУНКЦИЯ: ВЫБОР СОТРУДНИКА ДЛЯ ДНЯ (С ВВОДОМ ЧАСОВ) =====
+    function selectEmployeeForDay(employeeId, dateStr) {
+      // Показываем модальное окно для ввода часов
+      const employee = employees.find(e => e.id === employeeId);
+      if (!employee) return;
+      
+      // Создаём временное модальное окно для ввода часов
+      const existing = schedule.find(s => s.pointId === currentPointId && s.date === dateStr && s.employeeId === employeeId);
+      
+      if (existing) {
+        showToast('Этот сотрудник уже добавлен на этот день', 'warning');
         return;
       }
       
-      schedule = schedule.filter(s => !(s.pointId === currentPointId && s.date === dateStr));
+      // Закрываем текущий поп-ап и показываем модальное окно для ввода часов
+      closePopup('day-popup');
       
+      // Создаём модальное окно для ввода часов
+      const hoursPopup = document.createElement('div');
+      hoursPopup.className = 'popup active';
+      hoursPopup.id = 'hours-input-popup';
+      hoursPopup.innerHTML = `
+        <div class="popup-content">
+          <div class="popup-header">
+            <h3>Укажите часы работы</h3>
+            <button class="popup-close" onclick="closeHoursPopup()">×</button>
+          </div>
+          <div style="text-align: center; padding: 20px;">
+            <p style="margin-bottom: 15px; font-size: 16px;">Сотрудник: <strong>${employee.name}</strong></p>
+            <p style="margin-bottom: 15px; color: #64748b;">Ставка: ${employee.rate} ₽/час</p>
+            <div class="form-group">
+              <label class="hours-label">Количество часов (макс. 24)</label>
+              <input type="number" id="employee-hours" class="hours-input" min="1" max="24" value="8" style="width: 100%; padding: 10px; font-size: 16px; text-align: center;">
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+              <button class="btn btn-back" style="flex: 1;" onclick="closeHoursPopup()">Отмена</button>
+              <button class="btn btn-primary" style="flex: 1;" onclick="saveEmployeeHours(${employeeId}, '${dateStr}')">Сохранить</button>
+            </div>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(hoursPopup);
+    }
+    
+    // ===== НОВАЯ ФУНКЦИЯ: СОХРАНЕНИЕ ЧАСОВ =====
+    function saveEmployeeHours(employeeId, dateStr) {
+      const hoursInput = document.getElementById('employee-hours');
+      const hours = parseInt(hoursInput.value);
+      
+      if (isNaN(hours) || hours < 1 || hours > 24) {
+        showToast('Укажите корректное количество часов (1-24)', 'error');
+        return;
+      }
+      
+      // Добавляем запись в график
       schedule.push({
         pointId: currentPointId,
         employeeId: employeeId,
-        date: dateStr
+        date: dateStr,
+        hours: hours
       });
       
       localStorage.setItem('pvz_schedule', JSON.stringify(schedule));
       
-      const employee = employees.find(e => e.id === employeeId);
-      showToast(`📅 ${employee.name} назначен на ${dateStr}`, 'success');
-      closePopup('day-popup');
+      // Закрываем модальное окно часов
+      closeHoursPopup();
+      
+      // Перезапускаем поп-ап дня для обновления
+      showDayPopup(
+        parseInt(dateStr.split('-')[2]),
+        parseInt(dateStr.split('-')[1]) - 1,
+        parseInt(dateStr.split('-')[0])
+      );
+      
+      showToast('✅ Сотрудник добавлен на день', 'success');
       generateCalendar(currentYear, currentMonth);
     }
     
-    function clearDayAssignment() {
-      const dateStr = document.getElementById('popup-date').textContent;
-      const [day, monthName, year] = dateStr.split(' ');
-      const monthIndex = monthNames.findIndex(m => m.toLowerCase() === monthName);
-      const fullDate = formatDate(parseInt(year), monthIndex, parseInt(day));
+    // ===== НОВАЯ ФУНКЦИЯ: ЗАКРЫТИЕ МОДАЛЬНОГО ОКНА ЧАСОВ =====
+    function closeHoursPopup() {
+      const popup = document.getElementById('hours-input-popup');
+      if (popup) popup.remove();
+    }
+    
+    // ===== НОВАЯ ФУНКЦИЯ: УДАЛЕНИЕ СОТРУДНИКА ИЗ ДНЯ =====
+    function removeEmployeeFromDay(employeeId, dateStr) {
+      schedule = schedule.filter(s => 
+        !(s.pointId === currentPointId && s.date === dateStr && s.employeeId === employeeId)
+      );
+      localStorage.setItem('pvz_schedule', JSON.stringify(schedule));
       
-      schedule = schedule.filter(s => !(s.pointId === currentPointId && s.date === fullDate));
+      // Обновляем поп-ап дня
+      showDayPopup(
+        parseInt(dateStr.split('-')[2]),
+        parseInt(dateStr.split('-')[1]) - 1,
+        parseInt(dateStr.split('-')[0])
+      );
+      
+      showToast('✅ Сотрудник удалён из дня', 'success');
+      generateCalendar(currentYear, currentMonth);
+    }
+    
+    // ===== НОВАЯ ФУНКЦИЯ: ПОКАЗАТЬ СПИСОК СОТРУДНИКОВ ДЛЯ ДОБАВЛЕНИЯ =====
+    function showEmployeesForDay() {
+      const listEl = document.getElementById('day-employees-list');
+      const assignedContainer = document.getElementById('day-assigned-employees');
+      
+      assignedContainer.style.display = 'none';
+      listEl.style.display = 'block';
+      
+      if (employees.length === 0) {
+        listEl.innerHTML = '<p style="color: #94a3b8;">Сначала добавьте сотрудников</p>';
+        return;
+      }
+      
+      // Исключаем уже добавленных сотрудников
+      const daySchedule = schedule.filter(s => 
+        s.pointId === currentPointId && s.date === currentDayDate
+      );
+      const assignedIds = daySchedule.map(s => s.employeeId);
+      
+      const availableEmployees = employees.filter(e => !assignedIds.includes(e.id));
+      
+      if (availableEmployees.length === 0) {
+        listEl.innerHTML = '<p style="color: #94a3b8;">Все сотрудники уже добавлены на этот день</p>';
+        return;
+      }
+      
+      const sortedEmployees = [...availableEmployees].sort((a, b) => {
+        const aHasTag = employeeTags[a.id] && employeeTags[a.id].includes(currentPointId);
+        const bHasTag = employeeTags[b.id] && employeeTags[b.id].includes(currentPointId);
+        return bHasTag - aHasTag;
+      });
+      
+      let html = '';
+      sortedEmployees.forEach(emp => {
+        const isRecommended = employeeTags[emp.id] && employeeTags[emp.id].includes(currentPointId);
+        html += `
+          <div class="employee-item" onclick="selectEmployeeForDay(${emp.id}, '${currentDayDate}')">
+            <div class="employee-info">
+              <div class="employee-name">
+                ${emp.name}
+                ${isRecommended ? '<span class="recommended-badge">★ Рекомендован</span>' : ''}
+              </div>
+              <div class="employee-details">${emp.phone || ''} • ${emp.rate}₽/час</div>
+            </div>
+            <div style="font-size: 20px; color: #64748b;">➡️</div>
+          </div>
+        `;
+      });
+      listEl.innerHTML = html;
+    }
+    
+    // ===== ИЗМЕНЕНА ФУНКЦИЯ ОЧИСТКИ ДНЯ =====
+    function clearDayAssignment() {
+      schedule = schedule.filter(s => 
+        !(s.pointId === currentPointId && s.date === currentDayDate)
+      );
       localStorage.setItem('pvz_schedule', JSON.stringify(schedule));
       
       showToast('✅ День очищен', 'success');
@@ -1595,7 +1803,7 @@
           <div class="employee-item">
             <div class="employee-info">
               <div class="employee-name">${emp.name}</div>
-              <div class="employee-details">${emp.phone || ''} • ${emp.rate}₽/день</div>
+              <div class="employee-details">${emp.phone || ''} • ${emp.rate}₽/час</div>
               <div style="margin-top: 6px; font-size: 11px; color: #64748b;">
                 ${tagsHtml || '<span style="color: #94a3b8;">Нет тегов</span>'}
               </div>
@@ -1631,7 +1839,8 @@
     function exportToExcel() {
       let csvContent = '\ufeff';
       
-      const headers = ['Дата', 'Пункт выдачи', 'Адрес', 'Сотрудник', 'Телефон', 'Ставка'];
+      // Заголовки с колонкой "Часы"
+      const headers = ['Дата', 'Пункт выдачи', 'Адрес', 'Сотрудник', 'Телефон', 'Ставка в час', 'Часы'];
       csvContent += headers.map(cell => `"${cell.replace(/"/g, '""')}"`).join(',') + '\r\n';
       
       const sortedSchedule = [...schedule].sort((a, b) => a.date.localeCompare(b.date));
@@ -1646,7 +1855,8 @@
             point.address.replace(/"/g, '""'),
             employee.name.replace(/"/g, '""'),
             (employee.phone || '').replace(/"/g, '""'),
-            employee.rate
+            employee.rate,
+            entry.hours || 0
           ];
           csvContent += row.map(cell => `"${cell}"`).join(',') + '\r\n';
         }
@@ -1703,6 +1913,7 @@
       const startDate = new Date(startDateStr);
       const endDate = new Date(endDateStr);
       
+      // Фильтруем график по датам и пункту
       const filteredSchedule = schedule.filter(entry => {
         const entryDate = new Date(entry.date);
         const inDateRange = entryDate >= startDate && entryDate <= endDate;
@@ -1716,6 +1927,7 @@
         return;
       }
       
+      // Группируем данные по сотруднику и пункту, суммируем часы
       const reportMap = new Map();
       
       filteredSchedule.forEach(entry => {
@@ -1732,18 +1944,20 @@
             pointName: point.name,
             pointId: entry.pointId,
             employeeId: entry.employeeId,
-            count: 0,
+            totalHours: 0,
             rate: employee.rate
           });
         }
         
-        reportMap.get(key).count++;
+        reportMap.get(key).totalHours += entry.hours || 0;
       });
       
+      // Преобразуем в массив и сортируем
       const reportData = Array.from(reportMap.values()).sort((a, b) => 
         a.employeeName.localeCompare(b.employeeName)
       );
       
+      // Отображаем таблицу
       renderReportTable(reportData);
       document.getElementById('report-result').style.display = 'block';
     }
@@ -1752,35 +1966,37 @@
       const tableBody = document.getElementById('report-table-body');
       tableBody.innerHTML = '';
       
-      let totalCount = 0;
+      let totalHours = 0;
       let totalSum = 0;
       
       data.forEach(item => {
         const row = document.createElement('tr');
-        const total = item.count * item.rate;
+        const total = item.totalHours * item.rate;
         
         row.innerHTML = `
           <td>${item.employeeName}</td>
           <td>${item.pointName}</td>
-          <td>${item.count}</td>
-          <td>${item.rate} ₽</td>
+          <td>${item.totalHours.toFixed(1)}</td>
+          <td>${item.rate} ₽/ч</td>
           <td>${total.toFixed(2)} ₽</td>
         `;
         
         tableBody.appendChild(row);
         
-        totalCount += item.count;
+        totalHours += item.totalHours;
         totalSum += total;
       });
       
-      document.getElementById('report-total-count').textContent = totalCount;
+      // Обновляем итоги
+      document.getElementById('report-total-count').textContent = totalHours.toFixed(1);
       document.getElementById('report-total-sum').textContent = `${totalSum.toFixed(2)} ₽`;
     }
     
     function exportReportToExcel() {
       let csvContent = '\ufeff';
       
-      const headers = ['ФИО сотрудника', 'Пункт', 'Кол-во смен', 'Ставка', 'Итого'];
+      // Заголовки с правильными названиями
+      const headers = ['ФИО сотрудника', 'Пункт', 'Часы', 'Ставка в час', 'Итого'];
       csvContent += headers.map(cell => `"${cell.replace(/"/g, '""')}"`).join(',') + '\r\n';
       
       const table = document.getElementById('report-table');
